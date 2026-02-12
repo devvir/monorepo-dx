@@ -44,6 +44,7 @@ export function main() {
       logger.log(marked(readme));
     }
   } catch (error) {
-    logger.fatal(error.message);
+    logger.error(error.message);
+    process.exit(0);
   }
 }

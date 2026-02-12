@@ -67,12 +67,7 @@ export function runDockerCommand(module, command, composeArgs = [], capture = fa
  */
 function exec(options) {
   const cmd = buildComposeCommand(options);
-
-  try {
-    execSync(cmd, { stdio: 'inherit' });
-  } catch (error) {
-    process.exit(error.status || 1);
-  }
+  execSync(cmd, { stdio: 'inherit' });
 }
 
 /**
@@ -111,16 +106,28 @@ export function buildComposeCommand(options = {}) {
     // Module-specific compose
     const modules = getModules();
     const moduleConfig = modules[module];
+
     if (! moduleConfig) {
       const available = Object.keys(modules);
       throw new Error(`Unknown module: ${module}\nAvailable: ${available.join(', ')}`);
     }
+
     composeFile = path.join(PROJECT_ROOT, moduleConfig.compose);
   }
 
   // Validate compose file exists
   if (! fs.existsSync(composeFile)) {
-    throw new Error(`Compose file not found: ${composeFile}`);
+    logger.log('');
+
+    if (module === '.') {
+      throw new Error(
+        'No app-level compose file found.\n\n' +
+        'Create a compose.yml file in the root of your project,\n' +
+        'or specify a module: npm run dx up <module-name>'
+      );
+    } else {
+      throw new Error(`Compose file not found: ${composeFile}`);
+    }
   }
 
   let cmd = `docker compose -f "${composeFile}"`;

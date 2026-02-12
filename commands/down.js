@@ -21,6 +21,7 @@ export function main() {
 
     logger.success('Services stopped');
   } catch (err) {
-    logger.fatal(err.message);
+    logger.error(err.message);
+    process.exit(0);
   }
 }

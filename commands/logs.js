@@ -17,6 +17,7 @@ export function main() {
 
     runDockerCommand(module, 'logs', composeArgs);
   } catch (err) {
-    logger.fatal(err.message);
+    logger.error(err.message);
+    process.exit(0);
   }
 }

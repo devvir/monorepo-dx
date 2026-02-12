@@ -17,6 +17,7 @@ export function main() {
     logger.section(`Configuration for ${moduleConfig.description}`);
     logger.log(runDockerCommand(module, 'config', composeArgs, true));
   } catch (err) {
-    logger.fatal(err.message);
+    logger.error(err.message);
+    process.exit(0);
   }
 }
