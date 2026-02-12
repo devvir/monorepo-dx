@@ -1,0 +1,15 @@
+{
+  "name": "dx",
+  "version": "0.1.0",
+  "description": "Infrastructure and deployment orchestration",
+  "type": "module",
+  "scripts": {
+    "dx": "node dx.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "devDependencies": {
+    "cli-markdown": "^3.5.1"
+  }
+}
