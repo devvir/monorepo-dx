@@ -14,13 +14,23 @@ export function main() {
   try {
     const { module, composeArgs, moduleConfig } = parseCommandArgs();
 
-    logger.section(`Starting ${moduleConfig.description}`);
-    logger.pair('Module:', module === '.' ? '(full app)' : module);
-    logger.pair('Services:', moduleConfig.services.join(', '));
+    // Determine if a single service is being started (e.g., tb up reader rabbitmq)
+    // Find first positional arg after module that is not a flag
+    const requestedServices = composeArgs.filter(arg => !arg.startsWith('-') && !arg.includes('='));
+    const isSingleService = requestedServices.length === 1 && moduleConfig.services && moduleConfig.services.includes(requestedServices[0]);
+
+    if (isSingleService) {
+      logger.section(`Starting single service from module: ${module}`);
+      logger.pair('Module:', module);
+      logger.pair('Service:', requestedServices[0]);
+    } else {
+      logger.section(`Starting ${moduleConfig.description}`);
+      logger.pair('Module:', module === '.' ? '(full app)' : module);
+      logger.pair('Services:', moduleConfig.services ? moduleConfig.services.join(', ') : '');
+    }
 
     runDockerCommand(module, 'up', composeArgs);
   } catch (err) {
-    logger.error(err.message);
-    process.exit(0);
+    logger.fatal(err.message);
   }
 }
