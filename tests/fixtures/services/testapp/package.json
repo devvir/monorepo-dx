@@ -1,0 +1,10 @@
+{
+  "name": "testapp",
+  "version": "1.0.0",
+  "description": "Test application service",
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  }
+}

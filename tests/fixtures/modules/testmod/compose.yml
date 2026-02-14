@@ -1,0 +1,3 @@
+include:
+  - path: ../../services/testapp/compose.yml
+  - path: ../../services/testinfra/compose.yml

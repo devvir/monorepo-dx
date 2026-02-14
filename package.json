@@ -4,12 +4,16 @@
   "description": "Infrastructure and deployment orchestration",
   "type": "module",
   "scripts": {
-    "dx": "node dx.js"
+    "dx": "node dx.js",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui"
   },
   "engines": {
     "node": ">=22.0.0"
   },
   "devDependencies": {
-    "cli-markdown": "^3.5.1"
+    "cli-markdown": "^3.5.1",
+    "vitest": "^1.0.0"
   }
 }
