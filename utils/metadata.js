@@ -67,3 +67,30 @@ export function readReadmeDescription(dirPath) {
 export function readDescription(dirPath) {
   return readReadmeDescription(dirPath) || readPackageDescription(dirPath);
 }
+
+/**
+ * Read package.json from a directory
+ * @param {string} dirPath - Directory path
+ * @returns {Object|null} Parsed package.json or null
+ */
+export function readPackageJson(dirPath) {
+  try {
+    const packagePath = path.join(dirPath, 'package.json');
+    if (! fs.existsSync(packagePath)) return null;
+
+    return JSON.parse(fs.readFileSync(packagePath, 'utf-8'));
+  } catch (error) {
+    return null;
+  }
+}
+
+/**
+ * Check if a service has a specific npm script
+ * @param {Object} service - Service configuration object
+ * @param {string} scriptName - Script name to check (e.g., 'test', 'build')
+ * @returns {boolean} True if script exists
+ */
+export function hasNpmScript(service, scriptName) {
+  const pkg = readPackageJson(service.path);
+  return Boolean(pkg?.scripts?.[scriptName]);
+}

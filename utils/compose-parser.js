@@ -22,7 +22,7 @@ export function parseComposeFile(composePath) {
 }
 
 /**
- * Extract service names from module compose.yml include directives
+ * Extract service names from module compose.yml (include and extends directives)
  * @param {string} composePath - Path to module's compose.yml
  * @returns {string[]} Array of service names
  */
@@ -30,25 +30,29 @@ export function parseModuleServices(composePath) {
   const content = readComposeFile(composePath);
   if (! content) return [];
 
+  const services = new Set();
+
+  // Extract services from include directives
   const includeMatches = content.match(/include:\s*\n([\s\S]*?)(?=\n[a-z]|\n*$)/i);
-  if (! includeMatches) return [];
+  if (includeMatches) {
+    const lines = includeMatches[1].split('\n');
 
-  const services = [];
-  const lines = includeMatches[1].split('\n');
+    for (const line of lines) {
+      const match = line.match(/\/services\/([^/]+)\//);
 
-  for (const line of lines) {
-    const match = line.match(/\/services\/([^/]+)\//);
-
-    if (match) {
-      const serviceName = match[1];
-
-      if (! services.includes(serviceName)) {
-        services.push(serviceName);
+      if (match) {
+        services.add(match[1]);
       }
     }
   }
 
-  return services;
+  // Extract services from extends directives (to capture application services)
+  const extendsMatches = content.matchAll(/file:\s*\.\.\/\.\.\/services\/([^/]+)\//g);
+  for (const match of extendsMatches) {
+    services.add(match[1]);
+  }
+
+  return Array.from(services);
 }
 
 /**
