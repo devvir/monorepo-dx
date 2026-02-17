@@ -2,12 +2,12 @@ import { parseCommandArgs, runDockerCommand } from '../utils/docker.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `npm run dx config [MODULE]
+  return `pnpm run dx config [MODULE]
   Show resolved docker-compose configuration
 
   Examples:
-    npm run dx config          # Full app config
-    npm run dx config reader   # Reader module config`;
+    pnpm run dx config          # Full app config
+    pnpm run dx config reader   # Reader module config`;
 }
 
 export function main() {

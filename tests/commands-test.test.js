@@ -118,7 +118,7 @@ describe('test command', () => {
       // Should have called execSync for testapp (has test script)
       expect(execSync).toHaveBeenCalledTimes(1);
       expect(execSync).toHaveBeenCalledWith(
-        'npm run test',
+        'pnpm run test',
         expect.objectContaining({
           cwd: '/mock/services/testapp',
           stdio: 'inherit'
@@ -138,7 +138,7 @@ describe('test command', () => {
 
       expect(execSync).toHaveBeenCalledTimes(1);
       expect(execSync).toHaveBeenCalledWith(
-        'npm run test',
+        'pnpm run test',
         expect.objectContaining({
           cwd: '/mock/services/testapp'
         })
@@ -158,7 +158,7 @@ describe('test command', () => {
       // Should run tests for testapp (testinfra has no test script)
       expect(execSync).toHaveBeenCalledTimes(1);
       expect(execSync).toHaveBeenCalledWith(
-        'npm run test',
+        'pnpm run test',
         expect.objectContaining({
           cwd: '/mock/services/testapp'
         })

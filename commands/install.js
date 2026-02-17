@@ -5,7 +5,7 @@ import { getServices } from '../utils/modules.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `npm run dx install
+  return `pnpm run dx install
   Install all services that have an install.sh script`;
 }
 

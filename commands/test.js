@@ -4,16 +4,16 @@ import { hasNpmScript } from '../utils/metadata.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `npm run dx test [OPTIONS] [SERVICE]
+  return `pnpm run dx test [OPTIONS] [SERVICE]
   Run tests for services that define an npm test script
 
   Options:
     -m, --module <NAME>     Run tests for all services in a module
 
   Examples:
-    npm run dx test                 # All services with test scripts
-    npm run dx test -m reader       # All services in the reader module
-    npm run dx test archivist       # Run tests for archivist service only`;
+    pnpm run dx test                 # All services with test scripts
+    pnpm run dx test -m reader       # All services in the reader module
+    pnpm run dx test archivist       # Run tests for archivist service only`;
 }
 
 export async function main() {
@@ -49,7 +49,7 @@ function parseArgs(args) {
 
   if (args[0] === '-m' || args[0] === '--module') {
     if (! args[1]) {
-      logger.error('Module name required\nUsage: npm run dx test -m <MODULE_NAME>');
+      logger.error('Module name required\nUsage: pnpm run dx test -m <MODULE_NAME>');
       process.exit(1);
     }
     return { mode: 'module', target: args[1] };
@@ -102,7 +102,7 @@ function runServiceTest(serviceName, service) {
   logger.log(`\n→ Testing ${serviceName}...`);
 
   try {
-    execSync('npm run test', {
+    execSync('pnpm run test', {
       cwd: service.path,
       stdio: 'inherit',
       env: process.env

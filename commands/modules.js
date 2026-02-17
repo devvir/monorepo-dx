@@ -2,7 +2,7 @@ import { listModules, getModules } from '../utils/modules.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `npm run dx modules [OPTIONS]
+  return `pnpm run dx modules [OPTIONS]
   List all deployment modules
 
   Options:
@@ -32,5 +32,5 @@ export function main() {
   });
 
   logger.log('');
-  logger.log('Use: npm run dx up -- <MODULE>     # Start a module');
+  logger.log('Use: pnpm run dx up -- <MODULE>     # Start a module');
 }

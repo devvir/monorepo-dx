@@ -5,7 +5,7 @@ import { getServices } from '../utils/modules.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `npm run dx build
+  return `pnpm run dx build
   Build all services that have a build.sh script`;
 }
 

@@ -3,13 +3,13 @@ import { getModule, listModules } from '../utils/modules.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `npm run dx logs [MODULE] [OPTIONS]
+  return `pnpm run dx logs [MODULE] [OPTIONS]
   View service logs
 
   Examples:
-    npm run dx logs reader        # Reader logs
-    npm run dx logs reader -f     # Follow reader logs
-    npm run dx logs -- -t 20      # Last 20 lines`;
+    pnpm run dx logs reader        # Reader logs
+    pnpm run dx logs reader -f     # Follow reader logs
+    pnpm run dx logs -- -t 20      # Last 20 lines`;
 }
 
 export function main() {

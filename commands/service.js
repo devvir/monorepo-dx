@@ -2,17 +2,17 @@ import { getService } from '../utils/modules.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `npm run dx service -- <NAME> [OPTIONS]
+  return `pnpm run dx service -- <NAME> [OPTIONS]
   Show detailed information about a service
 
   Options:
     -v, --verbose           Show additional metadata
 
   Examples:
-    npm run dx service -- feed       # Feed service details
-    npm run dx service -- rabbitmq   # RabbitMQ details
-    npm run dx service -- mongodb    # MongoDB details
-    npm run dx service -- feed -v    # With additional info`;
+    pnpm run dx service -- feed       # Feed service details
+    pnpm run dx service -- rabbitmq   # RabbitMQ details
+    pnpm run dx service -- mongodb    # MongoDB details
+    pnpm run dx service -- feed -v    # With additional info`;
 }
 
 export function main() {
@@ -20,7 +20,7 @@ export function main() {
     const args = process.argv.slice(2);
 
     if (args.length === 0) {
-      logger.error('Usage: npm run dx service -- <NAME>');
+      logger.error('Usage: pnpm run dx service -- <NAME>');
 
       process.exit(0);
     }

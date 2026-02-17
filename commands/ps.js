@@ -2,12 +2,12 @@ import { parseCommandArgs, runDockerCommand } from '../utils/docker.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `npm run dx ps [MODULE]
+  return `pnpm run dx ps [MODULE]
   List running services
 
   Examples:
-    npm run dx ps              # All services
-    npm run dx ps reader       # Reader module services`;
+    pnpm run dx ps              # All services
+    pnpm run dx ps reader       # Reader module services`;
 }
 
 export function main() {

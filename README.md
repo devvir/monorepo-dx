@@ -3,7 +3,7 @@
 Node.js CLI for managing services and modules. Entry point:
 
 ```bash
-npm run dx <command> [args]
+pnpm run dx <command> [args]
 ```
 
 Or use the shell wrapper (see how to set it up in [USAGE.md](./USAGE.md)):
@@ -28,11 +28,11 @@ Create `commands/mycommand.js` with two required exports:
 
 ```javascript
 export function help() {
-  return `npm run dx mycommand [OPTIONS]
+  return `pnpm run dx mycommand [OPTIONS]
   Description of what this does
 
   Examples:
-    npm run dx mycommand option1    # Example usage`;
+    pnpm run dx mycommand option1    # Example usage`;
 }
 
 export async function main() {
@@ -46,7 +46,7 @@ export async function main() {
 ```
 
 **Required exports:**
-- `help()` - Returns help text string (auto-discovered and displayed by `npm run dx help`)
+- `help()` - Returns help text string (auto-discovered and displayed by `pnpm run dx help`)
 - `main()` - Async function executed when command is invoked (can be async or sync)
 
 **Pattern:**

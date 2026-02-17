@@ -15,11 +15,11 @@ const colors = {
 };
 
 /**
- * Replace 'npm run dx' with DX_EXECUTOR if set
+ * Replace 'pnpm run dx' with DX_EXECUTOR if set
  */
 function formatMessage(message) {
   if (process.env.DX_EXECUTOR) {
-    return message.replace(/npm run dx/g, process.env.DX_EXECUTOR);
+    return message.replace(/pnpm run dx/g, process.env.DX_EXECUTOR);
   }
   return message;
 }

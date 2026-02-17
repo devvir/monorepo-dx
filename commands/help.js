@@ -7,7 +7,7 @@ import * as logger from '../utils/logger.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export function help() {
-  return `npm run dx help
+  return `pnpm run dx help
   Show this help message`;
 }
 

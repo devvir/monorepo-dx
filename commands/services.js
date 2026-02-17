@@ -2,7 +2,7 @@ import { listServices, getServices } from '../utils/modules.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `npm run dx services [OPTIONS]
+  return `pnpm run dx services [OPTIONS]
   List all available services
 
   Options:
@@ -32,6 +32,6 @@ export function main() {
   });
 
   logger.log('');
-  logger.log('Use: npm run dx service -- <NAME>  # Get details about a service');
+  logger.log('Use: pnpm run dx service -- <NAME>  # Get details about a service');
 }
 

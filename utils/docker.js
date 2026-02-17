@@ -123,7 +123,7 @@ export function buildComposeCommand(options = {}) {
       throw new Error(
         'No app-level compose file found.\n\n' +
         'Create a compose.yml file in the root of your project,\n' +
-        'or specify a module: npm run dx up <module-name>'
+        'or specify a module: pnpm run dx up <module-name>'
       );
     } else {
       throw new Error(`Compose file not found: ${composeFile}`);

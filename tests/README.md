@@ -77,8 +77,8 @@ tests/
 
 ```bash
 npm test              # Run all tests
-npm run test:watch    # Run tests in watch mode
-npm run test:ui       # Run tests with UI dashboard
+pnpm run test:watch    # Run tests in watch mode
+pnpm run test:ui       # Run tests with UI dashboard
 ```
 
 ## What NOT to Test
