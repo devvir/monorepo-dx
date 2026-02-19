@@ -14,8 +14,8 @@ export function main() {
   try {
     const { module, composeArgs, moduleConfig } = parseCommandArgs();
 
-    logger.section(`Stopping ${moduleConfig.description}`);
-    logger.pair('Module:', module === '.' ? '(full app)' : module);
+    logger.section(module ? `Stopping ${moduleConfig.description}` : 'Stopping all modules');
+    if (module) logger.pair('Module:', module);
 
     runDockerCommand(module, 'down', composeArgs);
 

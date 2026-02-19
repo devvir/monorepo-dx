@@ -131,10 +131,10 @@ describe('up command', () => {
       const upCommand = await import('../commands/up.js');
 
       parseCommandArgs.mockReturnValue({
-        module: '.',
+        module: null,
         composeArgs: [],
         moduleConfig: {
-          name: '.',
+          name: null,
           description: 'Full application',
           services: ['testapp', 'testinfra', 'otherapp']
         }
@@ -142,7 +142,7 @@ describe('up command', () => {
 
       upCommand.main();
 
-      expect(runDockerCommand).toHaveBeenCalledWith('.', 'up', []);
+      expect(runDockerCommand).toHaveBeenCalledWith(null, 'up', []);
     });
 
     it('should handle single service within module', async () => {

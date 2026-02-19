@@ -15,7 +15,7 @@ export function help() {
 export function main() {
   try {
     const args = process.argv.slice(2);
-    let module = '.';
+    let module = null;
     let logArgs = [];
 
     // Look for a module name anywhere in the args
@@ -29,7 +29,7 @@ export function main() {
     }
 
     // If no module found, use all args as log options
-    if (logArgs.length === 0 && module === '.') {
+    if (logArgs.length === 0 && ! module) {
       logArgs = args;
     }
 

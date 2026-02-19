@@ -1,45 +1,27 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { execSync } from 'node:child_process';
-import { getServices } from '../utils/modules.js';
+import { listServices, listModules } from '../utils/modules.js';
+import { runCommand } from '../utils/runner.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `pnpm run dx build
-  Build all services that have a build.sh script`;
+  return `pnpm run dx build [name] [-- args]
+  Build a service or all services in a module.
+  If the service has a build.sh, it runs that (instead of pnpm, even for node services).
+  Otherwise, if it's a node service, delegates to pnpm build.
+  Extra args after -- are passed to the build script or pnpm.
+
+  Examples:
+    pnpm run dx build                     # Build all services
+    pnpm run dx build feed                # Build feed service
+    pnpm run dx build reader              # Build all services in the reader module
+    pnpm run dx build feed -- --verbose   # Pass --verbose to feed's build
+
+  Services: ${listServices().join(', ')}
+  Modules:  ${listModules().join(', ')}`;
 }
 
 export function main() {
   try {
-    const services = getServices();
-    const buildableServices = Object.keys(services).filter(name => {
-      const buildScript = path.join(services[name].path, 'build.sh');
-      return fs.existsSync(buildScript);
-    });
-
-    if (buildableServices.length === 0) {
-      logger.info('No services with build.sh scripts found');
-      process.exit(0);
-    }
-
-    logger.section(`Building ${buildableServices.length} service(s)`);
-
-    for (const serviceName of buildableServices) {
-      const service = services[serviceName];
-      const buildScript = path.join(service.path, 'build.sh');
-
-      logger.log(`\n→ Building ${serviceName}...`);
-
-      execSync('bash build.sh', {
-        cwd: service.path,
-        stdio: 'inherit',
-        env: process.env
-      });
-
-      logger.success(`${serviceName} built`);
-    }
-
-    logger.section(`✓ All ${buildableServices.length} service(s) built successfully`);
+    runCommand(process.argv.slice(2), { script: 'build.sh', pnpmCmd: 'build', label: 'Building' });
   } catch (err) {
     logger.fatal(err.message);
   }

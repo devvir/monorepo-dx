@@ -62,22 +62,11 @@ export function getService(serviceName) {
 
 /**
  * Validate and get module configuration (with services)
- * @param {string} moduleName - Module name (or '.' for full app)
+ * @param {string} moduleName - Module name
  * @returns {Object} Module configuration with services list
  * @throws {Error} If module not found
  */
 export function getModule(moduleName) {
-  // Special case: '.' represents the full application
-  if (moduleName === '.') {
-    return {
-      path: PROJECT_ROOT,
-      description: 'Full application',
-      compose: 'compose.yml',
-      hasCompose: true,
-      services: []
-    };
-  }
-
   const modules = getModules();
   const module = modules[moduleName];
 

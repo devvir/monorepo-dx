@@ -1,26 +1,54 @@
-import { describe, it, expect } from 'vitest';
-import * as psCommand from '../commands/ps.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('../utils/logger.js', () => ({
+  error: vi.fn()
+}));
+
+vi.mock('../utils/docker.js', () => ({
+  parseCommandArgs: vi.fn(),
+  runDockerCommand: vi.fn()
+}));
 
 describe('ps command', () => {
+  let parseCommandArgs;
+  let runDockerCommand;
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const dockerUtils = await import('../utils/docker.js');
+    parseCommandArgs = dockerUtils.parseCommandArgs;
+    runDockerCommand = dockerUtils.runDockerCommand;
+
+    parseCommandArgs.mockReturnValue({
+      module: null,
+      composeArgs: [],
+      moduleConfig: { description: 'Full app', services: [] }
+    });
+  });
+
   describe('help()', () => {
-    it('should export a help function', () => {
-      expect(typeof psCommand.help).toBe('function');
-    });
-
-    it('should return a string', () => {
-      const help = psCommand.help();
-      expect(typeof help).toBe('string');
-    });
-
-    it('should mention listing processes', () => {
-      const help = psCommand.help();
-      expect(help.toLowerCase()).toContain('ps');
+    it('should return a string mentioning ps', async () => {
+      const cmd = await import('../commands/ps.js');
+      expect(cmd.help().toLowerCase()).toContain('ps');
     });
   });
 
   describe('main()', () => {
-    it('should export a main function', () => {
-      expect(typeof psCommand.main).toBe('function');
+    it('calls runDockerCommand with ps and the module', async () => {
+      const cmd = await import('../commands/ps.js');
+      cmd.main();
+      expect(runDockerCommand).toHaveBeenCalledWith(null, 'ps', []);
+    });
+
+    it('calls runDockerCommand with specific module when provided', async () => {
+      parseCommandArgs.mockReturnValue({
+        module: 'reader',
+        composeArgs: [],
+        moduleConfig: { description: 'Reader', services: [] }
+      });
+      const cmd = await import('../commands/ps.js');
+      cmd.main();
+      expect(runDockerCommand).toHaveBeenCalledWith('reader', 'ps', []);
     });
   });
 });

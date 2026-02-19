@@ -16,6 +16,55 @@ After taking these steps, you may use the command right from the root of your pr
 - `[entrypoint] services`
 - ...
 
+## Commands
+
+### build
+
+Build services. Understands dx's concept of services and modules, and normalizes node and non-node services under a consistent interface.
+
+```bash
+[entrypoint] build                  # Build all services
+[entrypoint] build <service>        # Build a specific service
+[entrypoint] build <module>         # Build all services in a module
+[entrypoint] build <name> -- <args> # Pass extra args to the build script or pnpm
+```
+
+**Resolution order:**
+1. If the service has a `build.sh` script, it is executed (takes precedence over pnpm, even for Node services)
+2. Otherwise, if the service has a `package.json`, delegates to `pnpm build --filter="<service>"`
+3. Otherwise, skips (when building all or by module) or fails (when targeting a specific service)
+
+**Notes:**
+- When no filter is given or a module name is used, services with no build steps are silently skipped
+- When a specific service name is given, no build steps is treated as an error
+- module name takes precedence over a service name if both exist with the same name
+
+### install
+
+Install service dependencies. Follows the exact same logic as `build`, substituting `install.sh` and `pnpm install`.
+
+```bash
+[entrypoint] install                  # Install all services
+[entrypoint] install <service>        # Install a specific service
+[entrypoint] install <module>         # Install all services in a module
+[entrypoint] install <name> -- <args> # Pass extra args to the install script or pnpm
+```
+
+**Resolution order:**
+1. If the service has an `install.sh` script, it is executed (takes precedence over pnpm, even for Node services)
+2. Otherwise, if the service has a `package.json`, delegates to `pnpm install --filter="<service>"`
+3. Otherwise, skips (when installing all or by module) or fails (when targeting a specific service)
+
+### Opting out with `.dxskip`
+
+Placing a `.dxskip` file in a module directory excludes it from unfiltered runs (when no module name is given). It is still reachable by name.
+
+```bash
+touch modules/reader/.dxskip   # skip reader when running: dx up, dx down, etc.
+```
+
+
+
 ## Directory Structure Assumptions
 
 DX makes specific assumptions about your monorepo structure. These must be in place for DX to work correctly.
@@ -120,16 +169,31 @@ Notice that a module compose.yml may simply consist of include directives. This 
 
 ### Service Dependencies (Module-Level)
 
-Modules declare which services they depend on by including their compose files:
+Modules declare which services they depend on via `include` directives, or define multiple instances of a service using `extends`:
 
 ```yaml
-# modules/analysis/compose.yml
+# modules/reader/compose.yml (include + extends)
 include:
-  - ../../services/feed/docker/compose.yml
-  - ../../services/mongodb/docker/mongodb.yml
+  - ../../services/rabbitmq/docker/compose.yml
+  - ../../services/archivist/docker/compose.yml
+
+services:
+  feed-global:
+    extends:
+      file: ../../services/feed/docker/compose.yml
+      service: feed
+    environment:
+      FEED_ROLE: GLOBAL
+
+  feed-hv:
+    extends:
+      file: ../../services/feed/docker/compose.yml
+      service: feed
+    environment:
+      FEED_ROLE: HIGH_VOLUME
 ```
 
-DX parses these include directives to:
+DX parses both `include` paths and `extends` file references to:
 - Extract service names from paths matching `/services/<service-name>/`
 - Build dependency trees for the module
 - Display service relationships in module info

@@ -8,6 +8,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
 import { getModule, getModules, listModules } from './modules.js';
+import { isSkipped } from './discovery.js';
 import { parseEnvFile } from './env.js';
 import * as logger from './logger.js';
 
@@ -20,12 +21,12 @@ const PROJECT_ROOT = path.join(__dirname, '../..');
  * @returns {Object} { module, composeArgs, moduleConfig }
  */
 export function parseCommandArgs(args = process.argv.slice(2)) {
-  let module = '.';
+  let module = null;
   let composeArgs = [];
 
   // First positional arg (if not a flag) is the module name
   if (args.length > 0 && ! args[0].startsWith('-')) {
-    if (listModules().includes(args[0]) || args[0] === '.') {
+    if (listModules().includes(args[0])) {
       module = args[0];
       composeArgs = args.slice(1);
     } else {
@@ -35,8 +36,7 @@ export function parseCommandArgs(args = process.argv.slice(2)) {
     composeArgs = args;
   }
 
-  // Validate module exists
-  const moduleConfig = getModule(module);
+  const moduleConfig = module ? getModule(module) : null;
 
   return { module, composeArgs, moduleConfig };
 }
@@ -50,6 +50,17 @@ export function parseCommandArgs(args = process.argv.slice(2)) {
  * @returns {string|void} Output if capture=true
  */
 export function runDockerCommand(module, command, composeArgs = [], capture = false) {
+  if (! module) {
+    for (const [moduleName, moduleConfig] of Object.entries(getModules())) {
+      if (isSkipped(moduleConfig.path)) {
+        logger.info(`Skipping module "${moduleName}" (.dxskip)`);
+        continue;
+      }
+      runDockerCommand(moduleName, command, composeArgs, capture);
+    }
+    return;
+  }
+
   const execOptions = {
     module,
     args: [command, ...composeArgs],
@@ -95,39 +106,25 @@ function execCapture(options) {
  * @returns {string} Full docker-compose command
  */
 export function buildComposeCommand(options = {}) {
-  const { module = '.', args = [], verbose = false } = options;
+  const { module, args = [], verbose = false } = options;
 
-  let composeFile;
-
-  if (module === '.') {
-    // Root compose file for full application
-    composeFile = path.join(PROJECT_ROOT, 'compose.yml');
-  } else {
-    // Module-specific compose
-    const modules = getModules();
-    const moduleConfig = modules[module];
-
-    if (! moduleConfig) {
-      const available = Object.keys(modules);
-      throw new Error(`Unknown module: ${module}\nAvailable: ${available.join(', ')}`);
-    }
-
-    composeFile = path.join(PROJECT_ROOT, moduleConfig.compose);
+  if (! module) {
+    throw new Error('module is required');
   }
+
+  const modules = getModules();
+  const moduleConfig = modules[module];
+
+  if (! moduleConfig) {
+    const available = Object.keys(modules);
+    throw new Error(`Unknown module: ${module}\nAvailable: ${available.join(', ')}`);
+  }
+
+  const composeFile = path.join(PROJECT_ROOT, moduleConfig.compose);
 
   // Validate compose file exists
   if (! fs.existsSync(composeFile)) {
-    logger.log('');
-
-    if (module === '.') {
-      throw new Error(
-        'No app-level compose file found.\n\n' +
-        'Create a compose.yml file in the root of your project,\n' +
-        'or specify a module: pnpm run dx up <module-name>'
-      );
-    } else {
-      throw new Error(`Compose file not found: ${composeFile}`);
-    }
+    throw new Error(`Compose file not found: ${composeFile}`);
   }
 
   let cmd = `docker compose -f "${composeFile}"`;
@@ -140,7 +137,7 @@ export function buildComposeCommand(options = {}) {
   if (fs.existsSync(rootEnv)) envFiles.push(rootEnv);
 
   // 2. Module .env (always load if exists and not root module)
-  if (module !== '.') {
+  if (module) {
     const moduleEnv = path.join(PROJECT_ROOT, 'modules', module, '.env');
     if (fs.existsSync(moduleEnv)) envFiles.push(moduleEnv);
 

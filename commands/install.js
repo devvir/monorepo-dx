@@ -1,45 +1,27 @@
-import fs from 'node:fs';
-import path from 'node:path';
-import { execSync } from 'node:child_process';
-import { getServices } from '../utils/modules.js';
+import { listServices, listModules } from '../utils/modules.js';
+import { runCommand } from '../utils/runner.js';
 import * as logger from '../utils/logger.js';
 
 export function help() {
-  return `pnpm run dx install
-  Install all services that have an install.sh script`;
+  return `pnpm run dx install [name] [-- args]
+  Install a service or all services in a module.
+  If the service has an install.sh, it runs that (instead of pnpm, even for node services).
+  Otherwise, if it's a node service, delegates to pnpm install.
+  Extra args after -- are passed to the install script or pnpm.
+
+  Examples:
+    pnpm run dx install                     # Install all services
+    pnpm run dx install feed                # Install feed service
+    pnpm run dx install reader              # Install all services in the reader module
+    pnpm run dx install feed -- --frozen    # Pass --frozen to feed's install
+
+  Services: ${listServices().join(', ')}
+  Modules:  ${listModules().join(', ')}`;
 }
 
 export function main() {
   try {
-    const services = getServices();
-    const installableServices = Object.keys(services).filter(name => {
-      const installScript = path.join(services[name].path, 'install.sh');
-      return fs.existsSync(installScript);
-    });
-
-    if (installableServices.length === 0) {
-      logger.info('No services with install.sh scripts found');
-      process.exit(0);
-    }
-
-    logger.section(`Installing ${installableServices.length} service(s)`);
-
-    for (const serviceName of installableServices) {
-      const service = services[serviceName];
-      const installScript = path.join(service.path, 'install.sh');
-
-      logger.log(`\n→ Installing ${serviceName}...`);
-
-      execSync('bash install.sh', {
-        cwd: service.path,
-        stdio: 'inherit',
-        env: process.env
-      });
-
-      logger.success(`${serviceName} installed`);
-    }
-
-    logger.section(`✓ All ${installableServices.length} service(s) installed successfully`);
+    runCommand(process.argv.slice(2), { script: 'install.sh', pnpmCmd: 'install', label: 'Installing' });
   } catch (err) {
     logger.fatal(err.message);
   }

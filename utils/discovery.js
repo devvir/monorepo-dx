@@ -22,6 +22,16 @@ const MODULES_DIR = process.env.DX_MODULES_DIR
   : path.join(PROJECT_ROOT, 'modules');
 
 /**
+ * Check whether a service or module directory is marked to be skipped
+ * when running commands without a filter.
+ * @param {string} dirPath - Absolute path to the service or module directory
+ * @returns {boolean}
+ */
+export function isSkipped(dirPath) {
+  return fs.existsSync(path.join(dirPath, '.dxskip'));
+}
+
+/**
  * Discover all services by scanning services/ directory
  * @returns {Object} Map of services
  */
