@@ -51,6 +51,13 @@ export function parseCommandArgs(args = process.argv.slice(2)) {
  */
 export function runDockerCommand(module, command, composeArgs = [], capture = false) {
   if (! module) {
+    // Ensure network exists before running any module commands
+    const rootEnv = path.join(PROJECT_ROOT, '.env');
+    const rootEnvVars = fs.existsSync(rootEnv) ? parseEnvFile(rootEnv) : {};
+    const projectName = rootEnvVars.COMPOSE_PROJECT_NAME || 'dx';
+
+    ensureNetworkExists(`${projectName}-network`);
+
     for (const [moduleName, moduleConfig] of Object.entries(getModules())) {
       if (isSkipped(moduleConfig.path)) {
         logger.info(`Skipping module "${moduleName}" (.dxskip)`);
@@ -60,6 +67,13 @@ export function runDockerCommand(module, command, composeArgs = [], capture = fa
     }
     return;
   }
+
+  // Ensure network exists before running any docker command
+  const rootEnv = path.join(PROJECT_ROOT, '.env');
+  const rootEnvVars = fs.existsSync(rootEnv) ? parseEnvFile(rootEnv) : {};
+  const projectName = rootEnvVars.COMPOSE_PROJECT_NAME || 'dx';
+
+  ensureNetworkExists(`${projectName}-network`);
 
   const execOptions = {
     module,
@@ -166,4 +180,20 @@ export function buildComposeCommand(options = {}) {
   if (verbose) logger.info(`$ ${cmd}`);
 
   return cmd;
+}
+
+/**
+ * Ensure the shared network exists (idempotent)
+ * Required because multiple compose projects share the same network
+ * @param {string} networkName - Network name (derived from COMPOSE_PROJECT_NAME)
+ * @returns {void}
+ */
+function ensureNetworkExists(networkName) {
+  try {
+    execSync(`docker network inspect ${networkName} >/dev/null 2>&1 || docker network create ${networkName}`, {
+      stdio: 'pipe'
+    });
+  } catch (error) {
+    logger.warn(`Failed to ensure network ${networkName} exists: ${error.message}`);
+  }
 }
