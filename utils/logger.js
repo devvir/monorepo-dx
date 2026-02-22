@@ -26,6 +26,7 @@ function formatMessage(message) {
 
 /**
  * Format and log info message
+ * @public
  */
 export function info(message) {
   console.log(`${colors.cyan}ℹ${colors.reset} ${formatMessage(message)}`);
@@ -33,6 +34,7 @@ export function info(message) {
 
 /**
  * Format and log success message
+ * @public
  */
 export function success(message) {
   console.log(`${colors.green}✓${colors.reset} ${formatMessage(message)}`);
@@ -40,6 +42,7 @@ export function success(message) {
 
 /**
  * Format and log warning message
+ * @public
  */
 export function warn(message) {
   console.log(`${colors.yellow}⚠${colors.reset} ${formatMessage(message)}`);
@@ -47,6 +50,7 @@ export function warn(message) {
 
 /**
  * Format and log error message
+ * @public
  */
 export function error(message) {
   console.error(`${colors.red}✗${colors.reset} ${formatMessage(message)}`);
@@ -54,6 +58,7 @@ export function error(message) {
 
 /**
  * Format and log debug message
+ * @public
  */
 export function debug(message) {
   if (process.env.DEBUG) {
@@ -63,6 +68,7 @@ export function debug(message) {
 
 /**
  * Print section header
+ * @public
  */
 export function section(title) {
   console.log(`\n${colors.bright}${colors.blue}${formatMessage(title)}${colors.reset}\n`);
@@ -70,6 +76,7 @@ export function section(title) {
 
 /**
  * Print key-value pair
+ * @public
  */
 export function pair(key, value) {
   console.log(`  ${colors.dim}${formatMessage(key)}${colors.reset} ${formatMessage(value)}`);
@@ -77,6 +84,7 @@ export function pair(key, value) {
 
 /**
  * Print raw output (no formatting)
+ * @public
  */
 export function log(message) {
   console.log(formatMessage(message));
@@ -84,6 +92,7 @@ export function log(message) {
 
 /**
  * Exit with error
+ * @public
  */
 export function fatal(message) {
   error(message);

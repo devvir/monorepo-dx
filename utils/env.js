@@ -4,7 +4,6 @@
  */
 
 import fs from 'node:fs';
-import path from 'node:path';
 
 /**
  * Parse .env file into object
@@ -35,31 +34,4 @@ export function parseEnvFile(filePath) {
   });
 
   return env;
-}
-
-/**
- * Get all environment variables for a module
- * @param {string} module - Module name
- * @param {string} envDir - Directory containing .env files
- * @returns {Object} Merged environment variables
- */
-export function getModuleEnv(module, envDir) {
-  const common = parseEnvFile(path.join(envDir, '.env'));
-  const moduleEnv = module !== '.' ? parseEnvFile(path.join(envDir, `.env.${module}`)) : {};
-
-  return { ...common, ...moduleEnv };
-}
-
-/**
- * Validate required environment variables
- * @param {Object} env - Environment object
- * @param {string[]} required - Required variable names
- * @throws {Error} If required variables are missing
- */
-export function validateRequired(env, required = []) {
-  const missing = required.filter(key => !env[key]);
-
-  if (missing.length > 0) {
-    throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
-  }
 }
