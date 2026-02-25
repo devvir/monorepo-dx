@@ -10,10 +10,10 @@ export function help() {
   Extra args after -- are passed to the build script or pnpm.
 
   Examples:
-    pnpm run dx build                     # Build all services
-    pnpm run dx build feed                # Build feed service
-    pnpm run dx build reader              # Build all services in the reader module
-    pnpm run dx build feed -- --verbose   # Pass --verbose to feed's build
+    pnpm run dx build                         # Build all services
+    pnpm run dx build myservice               # Build myservice service
+    pnpm run dx build mymodule                # Build all services in the mymodule module
+    pnpm run dx build myservice -- --verbose  # Pass --verbose to myservice's build
 
   Services: ${listServices().join(', ')}
   Modules:  ${listModules().join(', ')}`;

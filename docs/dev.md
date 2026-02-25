@@ -16,6 +16,6 @@ When no module is given, install and build run across all services, then all mod
 
 ```bash
 dx dev                      # Full startup for all modules
-dx dev reader               # Full startup for the reader module
-dx dev reader -d            # Same, detached
+dx dev mymodule             # Full startup for the mymodule module
+dx dev mymodule -d          # Same, detached
 ```

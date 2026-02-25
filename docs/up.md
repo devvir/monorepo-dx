@@ -18,7 +18,7 @@ When no module is given, all discovered modules are started in sequence. Modules
 
 ```bash
 dx up                       # Start all modules
-dx up reader                # Start the reader module
-dx up reader -d             # Start detached
-dx up reader --build        # Force rebuild images before starting
-```
+dx up mymodule              # Start the mymodule module
+dx up mymodule -d           # Start detached
+dx up mymodule --build      # Force rebuild images before starting
+`

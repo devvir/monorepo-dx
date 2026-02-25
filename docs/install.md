@@ -28,8 +28,8 @@ If the given name matches both a module and a service, the module takes preceden
 ## Examples
 
 ```bash
-dx install                          # Install all services
-dx install feed                     # Install the feed service
-dx install reader                   # Install all services in the reader module
-dx install feed -- --frozen-lockfile # Pass --frozen-lockfile to pnpm
+dx install                           # Install all services
+dx install myservice                # Install the myservice service
+dx install mymodule                 # Install all services in the mymodule module
+dx install myservice -- --frozen-lockfile # Pass --frozen-lockfile to pnpm
 ```

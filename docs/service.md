@@ -12,7 +12,7 @@ dx service -- <name> -v     # With additional metadata
 ## Examples
 
 ```bash
-dx service -- feed          # Feed service details
+dx service -- myservice     # MyService service details
 dx service -- rabbitmq      # RabbitMQ details
-dx service -- feed -v       # With additional metadata
+dx service -- myservice -v  # With additional metadata
 ```

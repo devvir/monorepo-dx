@@ -11,9 +11,9 @@ export function help() {
     -m, --module <NAME>     Run tests for all services in a module
 
   Examples:
-    pnpm run dx test                 # All services with test scripts
-    pnpm run dx test -m reader       # All services in the reader module
-    pnpm run dx test archivist       # Run tests for archivist service only`;
+    pnpm run dx test                # All services with test scripts
+    pnpm run dx test -m mymodule    # All services in the mymodule module
+    pnpm run dx test myservice      # Run tests for myservice only`;
 }
 
 export async function main() {

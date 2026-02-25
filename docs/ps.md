@@ -15,5 +15,5 @@ Delegates to `docker compose ps`.
 
 ```bash
 dx ps                       # All running containers
-dx ps reader                # Containers in the reader module
+dx ps mymodule              # Containers in the mymodule module
 ```

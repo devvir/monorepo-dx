@@ -14,7 +14,7 @@ Any options after the module name are forwarded directly to `docker compose logs
 ## Examples
 
 ```bash
-dx logs reader              # View reader module logs
-dx logs reader -f           # Follow (tail) reader logs
+dx logs mymodule            # View mymodule module logs
+dx logs mymodule -f         # Follow (tail) mymodule logs
 dx logs -- -t 20            # Last 20 lines of all services
 ```

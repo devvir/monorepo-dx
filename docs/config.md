@@ -15,5 +15,5 @@ Delegates to `docker compose config`.
 
 ```bash
 dx config                   # Full resolved config
-dx config reader            # Resolved config for the reader module
+dx config mymodule          # Resolved config for the mymodule module
 ```

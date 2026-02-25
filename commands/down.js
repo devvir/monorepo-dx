@@ -6,7 +6,7 @@ export function help() {
   Stop services
 
   Examples:
-    pnpm run dx down reader        # Stop reader
+    pnpm run dx down mymodule      # Stop mymodule module
     pnpm run dx down socket        # Stop socket`;
 }
 

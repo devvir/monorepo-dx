@@ -9,10 +9,10 @@ export function help() {
     -v, --verbose           Show additional metadata
 
   Examples:
-    pnpm run dx service -- feed       # Feed service details
+    pnpm run dx service -- myservice  # MyService service details
     pnpm run dx service -- rabbitmq   # RabbitMQ details
     pnpm run dx service -- mongodb    # MongoDB details
-    pnpm run dx service -- feed -v    # With additional info`;
+    pnpm run dx service -- myservice -v # With additional info`;
 }
 
 export function main() {

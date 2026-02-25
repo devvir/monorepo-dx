@@ -7,7 +7,7 @@ export function help() {
 
   Examples:
     pnpm run dx ps              # All services
-    pnpm run dx ps reader       # Reader module services`;
+    pnpm run dx ps mymodule     # Services for module mymodule`;
 }
 
 export function main() {

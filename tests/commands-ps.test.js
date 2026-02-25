@@ -42,13 +42,13 @@ describe('ps command', () => {
 
     it('calls runDockerCommand with specific module when provided', async () => {
       parseCommandArgs.mockReturnValue({
-        module: 'reader',
+        module: 'mymodule',
         composeArgs: [],
-        moduleConfig: { description: 'Reader', services: [] }
+        moduleConfig: { description: 'MyModule', services: [] }
       });
       const cmd = await import('../commands/ps.js');
       cmd.main();
-      expect(runDockerCommand).toHaveBeenCalledWith('reader', 'ps', []);
+      expect(runDockerCommand).toHaveBeenCalledWith('mymodule', 'ps', []);
     });
   });
 });

@@ -7,8 +7,8 @@ export function help() {
   Install dependencies, build, and start services
 
   Examples:
-    pnpm run dx dev reader          # Reader module
-    pnpm run dx dev reader -d       # Reader module, detached`;
+    pnpm run dx dev mymodule        # MyModule module
+    pnpm run dx dev mymodule -d     # MyModule module, detached`;
 }
 
 export function main() {

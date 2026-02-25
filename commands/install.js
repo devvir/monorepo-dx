@@ -10,10 +10,10 @@ export function help() {
   Extra args after -- are passed to the install script or pnpm.
 
   Examples:
-    pnpm run dx install                     # Install all services
-    pnpm run dx install feed                # Install feed service
-    pnpm run dx install reader              # Install all services in the reader module
-    pnpm run dx install feed -- --frozen    # Pass --frozen to feed's install
+    pnpm run dx install                         # Install all services
+    pnpm run dx install myservice               # Install myservice service
+    pnpm run dx install mymodule                # Install all services in the mymodule module
+    pnpm run dx install myservice -- --frozen   # Pass --frozen to myservice's install
 
   Services: ${listServices().join(', ')}
   Modules:  ${listModules().join(', ')}`;

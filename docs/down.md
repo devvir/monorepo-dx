@@ -18,6 +18,6 @@ When no module is given, all discovered modules are stopped in sequence. Modules
 
 ```bash
 dx down                     # Stop all modules
-dx down reader              # Stop the reader module
-dx down reader -v           # Stop and remove volumes
+dx down mymodule            # Stop the mymodule module
+dx down mymodule -v         # Stop and remove volumes
 ```

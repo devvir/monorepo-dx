@@ -11,6 +11,6 @@ dx module -- <name>         # Module details
 ## Examples
 
 ```bash
-dx module -- reader         # Reader module details
+dx module -- mymodule       # MyModule module details
 dx module -- app            # App module details
 ```

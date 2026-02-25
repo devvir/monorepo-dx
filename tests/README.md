@@ -27,7 +27,7 @@ vi.mock('node:child_process', () => ({
   execSync: vi.fn()
 }));
 
-// Test that "tb up reader -d rabbitmq" generates the correct command
+// Test that "tb up mymodule -d rabbitmq" generates the correct command
 ```
 
 ### 2. Build/npm Commands (build, install, test)

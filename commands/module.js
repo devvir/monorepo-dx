@@ -8,8 +8,8 @@ export function help() {
   Show detailed information about a module
 
   Examples:
-    pnpm run dx module -- reader     # Reader module details
-    pnpm run dx module -- socket     # Socket module details`;
+    pnpm run dx module -- mymodule#   # MyModule module details
+    pnpm run dx module -- socket      # Socket module details`;
 }
 
 export function main() {

@@ -11,7 +11,7 @@ vi.mock('../utils/docker.js', () => ({
 
 vi.mock('../utils/modules.js', () => ({
   getModule: vi.fn(),
-  listModules: vi.fn(() => ['reader', 'tester'])
+  listModules: vi.fn(() => ['mymodule', 'tester'])
 }));
 
 describe('logs command', () => {
@@ -40,17 +40,17 @@ describe('logs command', () => {
     });
 
     it('extracts module name from args and leaves flags', async () => {
-      process.argv = ['node', 'dx.js', 'reader', '-f'];
+      process.argv = ['node', 'dx.js', 'mymodule', '-f'];
       const cmd = await import('../commands/logs.js');
       cmd.main();
-      expect(runDockerCommand).toHaveBeenCalledWith('reader', 'logs', ['-f']);
+      expect(runDockerCommand).toHaveBeenCalledWith('mymodule', 'logs', ['-f']);
     });
 
     it('extracts module even when flags appear before it', async () => {
-      process.argv = ['node', 'dx.js', '-t', '20', 'reader'];
+      process.argv = ['node', 'dx.js', '-t', '20', 'mymodule'];
       const cmd = await import('../commands/logs.js');
       cmd.main();
-      expect(runDockerCommand).toHaveBeenCalledWith('reader', 'logs', ['-t', '20']);
+      expect(runDockerCommand).toHaveBeenCalledWith('mymodule', 'logs', ['-t', '20']);
     });
 
     it('passes all args as log options when no module given', async () => {

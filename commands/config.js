@@ -6,8 +6,8 @@ export function help() {
   Show resolved docker-compose configuration
 
   Examples:
-    pnpm run dx config          # Full app config
-    pnpm run dx config reader   # Reader module config`;
+    pnpm run dx config            # Full app config
+    pnpm run dx config mymodule   # Module config`;
 }
 
 export function main() {

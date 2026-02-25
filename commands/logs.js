@@ -7,9 +7,9 @@ export function help() {
   View service logs
 
   Examples:
-    pnpm run dx logs reader        # Reader logs
-    pnpm run dx logs reader -f     # Follow reader logs
-    pnpm run dx logs -- -t 20      # Last 20 lines`;
+    pnpm run dx logs mymodule       # Logs for module mymodule
+    pnpm run dx logs mymodule -f    # Follow logs for module mymodule
+    pnpm run dx logs -- -t 20       # Last 20 lines`;
 }
 
 export function main() {

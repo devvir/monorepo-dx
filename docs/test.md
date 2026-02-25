@@ -16,6 +16,6 @@ Services without a test script are silently skipped.
 
 ```bash
 dx test                     # All services with tests
-dx test -m reader           # All testable services in the reader module
-dx test archivist           # Tests for the archivist service only
+dx test -m mymodule         # All testable services in the mymodule module
+dx test myservice           # Tests for the myservice service only
 ```

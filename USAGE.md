@@ -60,7 +60,7 @@ Install service dependencies. Follows the exact same logic as `build`, substitut
 Placing a `.dxskip` file in a module directory excludes it from unfiltered runs (when no module name is given). It is still reachable by name.
 
 ```bash
-touch modules/reader/.dxskip   # skip reader when running: dx up, dx down, etc.
+touch modules/mymodule/.dxskip   # skip mymodule when running: dx up, dx down, etc.
 ```
 
 
@@ -114,7 +114,7 @@ services/<service-name>/
 ```
 
 **Examples:**
-- Node.js service: `services/feed/` with `package.json`, `src/`, `docker/compose.yml`
+- Node.js service: `services/myservice/` with `package.json`, `src/`, `docker/compose.yml`
 - Python service: `services/analytics/` with `pyproject.toml`, `src/`, `docker/Dockerfile`
 - Database: `services/mongodb/` with `docker/mongodb.yml`
 - Queue: `services/rabbitmq/` with `docker/rabbitmq.yml`
@@ -136,10 +136,10 @@ modules/<module-name>/
 The module's `compose.yml` file uses **include directives** to reference services:
 
 ```yaml
-# Example: modules/reader/compose.yml
+# Example: modules/mymodule/compose.yml
 include:
-  - ../../services/feed/docker/compose.yml
-  - ../../services/archivist/docker/compose.yml
+  - ../../services/myservice/docker/compose.yml
+  - ../../services/writer/docker/compose.yml
 
 # ... module-specific configuration
 ```
@@ -172,25 +172,25 @@ Notice that a module compose.yml may simply consist of include directives. This 
 Modules declare which services they depend on via `include` directives, or define multiple instances of a service using `extends`:
 
 ```yaml
-# modules/reader/compose.yml (include + extends)
+# modules/mymodule/compose.yml (include + extends)
 include:
   - ../../services/rabbitmq/docker/compose.yml
-  - ../../services/archivist/docker/compose.yml
+  - ../../services/writer/docker/compose.yml
 
 services:
-  feed-global:
+  myservice-global:
     extends:
-      file: ../../services/feed/docker/compose.yml
-      service: feed
+      file: ../../services/myservice/docker/compose.yml
+      service: myservice
     environment:
-      FEED_ROLE: GLOBAL
+      MYSERVICE_ROLE: GLOBAL
 
-  feed-hv:
+  myservice-hv:
     extends:
-      file: ../../services/feed/docker/compose.yml
-      service: feed
+      file: ../../services/myservice/docker/compose.yml
+      service: myservice
     environment:
-      FEED_ROLE: HIGH_VOLUME
+      MYSERVICE_ROLE: HIGH_VOLUME
 ```
 
 DX parses both `include` paths and `extends` file references to:
@@ -242,24 +242,24 @@ LOG_LEVEL=info
 The module's `.env` overrides values from the root:
 
 ```bash
-# modules/reader/.env
-REDIS_HOST=redis-reader  # Override root value
-READER_TIMEOUT=30        # Add module-specific var
+# modules/mymodule/.env
+REDIS_HOST=redis-mymodule   # Override root value
+MYMODULE_TIMEOUT=30         # Add module-specific var
 ```
 
-Result passed to Docker Compose: `DB_HOST=localhost`, `REDIS_HOST=redis-reader`, `APP_ENV=production`, `LOG_LEVEL=info`, `READER_TIMEOUT=30`
+Result passed to Docker Compose: `DB_HOST=localhost`, `REDIS_HOST=redis-mymodule`, `APP_ENV=production`, `LOG_LEVEL=info`, `MYMODULE_TIMEOUT=30`
 
 **Step 3: Additionally apply environment-specific file (if `APP_ENV` is set)**
 
-If `APP_ENV=production` is defined in the root `.env`, DX will additionally load `modules/reader/.env.production` if it exists:
+If `APP_ENV=production` is defined in the root `.env`, DX will additionally load `modules/mymodule/.env.production` if it exists:
 
 ```bash
-# modules/reader/.env.production
+# modules/mymodule/.env.production
 LOG_LEVEL=warn              # Production-specific override
 REDIS_HOST=redis-prod       # Production-specific config
 ```
 
-Final result passed to Docker Compose: `DB_HOST=localhost`, `REDIS_HOST=redis-prod`, `APP_ENV=production`, `LOG_LEVEL=warn`, `READER_TIMEOUT=30`
+Final result passed to Docker Compose: `DB_HOST=localhost`, `REDIS_HOST=redis-prod`, `APP_ENV=production`, `LOG_LEVEL=warn`, `MYMODULE_TIMEOUT=30`
 
 **Note:** The module's base `.env` is still loaded. Environment-specific files are merged on top, allowing you to keep common module config in `.env` and only override what changes per environment.
 
@@ -278,9 +278,9 @@ APP_ENV=development
 **Module-Specific Customization**
 
 ```bash
-# modules/reader/.env
-READER_TIMEOUT=30          # Module tweaks service timeout
-READER_WORKERS=4           # Module tweaks concurrency
+# modules/mymodule/.env
+MYMODULE_TIMEOUT=30         # Module tweaks service timeout
+MYMODULE_WORKERS=4          # Module tweaks concurrency
 ```
 
 **Environment-Specific Configuration**

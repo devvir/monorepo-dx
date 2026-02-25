@@ -28,8 +28,8 @@ If the given name matches both a module and a service, the module takes preceden
 ## Examples
 
 ```bash
-dx build                        # Build all services
-dx build feed                   # Build the feed service
-dx build reader                 # Build all services in the reader module
-dx build feed -- --verbose      # Pass --verbose to feed's build.sh or pnpm
+dx build                          # Build all services
+dx build myservice                # Build the myservice service
+dx build mymodule                 # Build all services in the mymodule module
+dx build myservice -- --verbose   # Pass --verbose to myservice's build.sh or pnpm
 ```
