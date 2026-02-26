@@ -26,11 +26,14 @@ export function parseCommandArgs(args = process.argv.slice(2)) {
 
   // First positional arg (if not a flag) is the module name
   if (args.length > 0 && ! args[0].startsWith('-')) {
-    if (listModules().includes(args[0])) {
-      module = args[0];
+    const candidate = args[0];
+
+    if (listModules().includes(candidate)) {
+      module = candidate;
       composeArgs = args.slice(1);
     } else {
-      composeArgs = args;
+      const available = listModules().join(', ');
+      throw new Error(`Unknown module: "${candidate}"\nAvailable modules: ${available}`);
     }
   } else {
     composeArgs = args;
