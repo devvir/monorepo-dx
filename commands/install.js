@@ -1,28 +1,28 @@
-import { listServices, listModules } from '../utils/modules.js';
-import { runCommand } from '../utils/runner.js';
+import { runForTarget } from '../utils/runner.js';
 import * as logger from '../utils/logger.js';
 
-export function help() {
-  return `pnpm run dx install [name] [-- args]
-  Install a service or all services in a module.
-  If the service has an install.sh, it runs that (instead of pnpm, even for node services).
-  Otherwise, if it's a node service, delegates to pnpm install.
-  Extra args after -- are passed to the install script or pnpm.
-
-  Examples:
-    pnpm run dx install                         # Install all services
-    pnpm run dx install myservice               # Install myservice service
-    pnpm run dx install mymodule                # Install all services in the mymodule module
-    pnpm run dx install myservice -- --frozen   # Pass --frozen to myservice's install
-
-  Services: ${listServices().join(', ')}
-  Modules:  ${listModules().join(', ')}`;
+/**
+ * Install dependencies for a service or all services in a module.
+ *
+ * @param {string|undefined} target - Service or module name (undefined = all)
+ * @param {string[]} [extraArgs] - Extra args to forward (typically after --)
+ */
+export function action(target, extraArgs = []) {
+  runForTarget(target, { script: 'install.sh', pnpmCmd: 'install', label: 'Installing', extraArgs });
 }
 
-export function main() {
-  try {
-    runCommand(process.argv.slice(2), { script: 'install.sh', pnpmCmd: 'install', label: 'Installing' });
-  } catch (err) {
-    logger.fatal(err.message);
-  }
+export function register(program) {
+  program
+    .command('install [target]')
+    .description('Install dependencies for a service or all services in a module')
+    .allowExcessArguments()
+    .allowUnknownOption()
+    .action((target, options, cmd) => {
+      try {
+        const extraArgs = target ? cmd.args.slice(1) : cmd.args;
+        action(target, extraArgs);
+      } catch (err) {
+        logger.fatal(err.message);
+      }
+    });
 }

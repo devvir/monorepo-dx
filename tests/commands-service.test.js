@@ -1,26 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import * as serviceCommand from '../commands/service.js';
 
 describe('service command', () => {
-  describe('help()', () => {
-    it('should export a help function', () => {
-      expect(typeof serviceCommand.help).toBe('function');
-    });
-
-    it('should return a string', () => {
-      const help = serviceCommand.help();
-      expect(typeof help).toBe('string');
-    });
-
-    it('should mention service operations', () => {
-      const help = serviceCommand.help();
-      expect(help.toLowerCase()).toContain('service');
+  describe('register()', () => {
+    it('should export a register function', async () => {
+      const cmd = await import('../commands/service.js');
+      expect(typeof cmd.register).toBe('function');
     });
   });
 
-  describe('main()', () => {
-    it('should export a main function', () => {
-      expect(typeof serviceCommand.main).toBe('function');
+  describe('action()', () => {
+    it('should export an action function', async () => {
+      const cmd = await import('../commands/service.js');
+      expect(typeof cmd.action).toBe('function');
     });
   });
 });

@@ -49,19 +49,21 @@ dx test -m app
 
 | Command | Description |
 |---------|-------------|
-| [`dx up`](docs/up.md) | Start a module |
-| [`dx down`](docs/down.md) | Stop a module |
-| [`dx ps`](docs/ps.md) | List running services |
-| [`dx logs`](docs/logs.md) | View service logs |
-| [`dx build`](docs/build.md) | Build services |
-| [`dx install`](docs/install.md) | Install service dependencies |
-| [`dx test`](docs/test.md) | Run service tests |
-| [`dx dev`](docs/dev.md) | Install, build, and start in one step |
-| [`dx config`](docs/config.md) | Show resolved Docker Compose config |
-| [`dx services`](docs/services.md) | List all discovered services |
-| [`dx modules`](docs/modules.md) | List all discovered modules |
-| [`dx service`](docs/service.md) | Show details about a service |
-| [`dx module`](docs/module.md) | Show details about a module |
+| `dx up [options]` | Start a module (`-i` to install + build first) |
+| `dx down` | Stop a module |
+| `dx ps` | List running services |
+| `dx logs` | View service logs |
+| `dx build [target]` | Build services |
+| `dx install [target]` | Install service dependencies |
+| `dx test [service]` | Run service tests (`-m <module>` for module) |
+| `dx dev` | Install, build, and start in one step |
+| `dx config` | Show resolved Docker Compose config |
+| `dx services` | List all discovered services |
+| `dx modules` | List all discovered modules |
+| `dx service <name>` | Show details about a service |
+| `dx module <name>` | Show details about a module |
+
+Run `dx --help` or `dx <command> --help` for full usage details. See [docs/commands.md](./docs/commands.md) for the complete reference.
 
 ## Setup
 
@@ -69,4 +71,4 @@ See [USAGE.md](./USAGE.md) for full setup instructions, directory structure requ
 
 ## Extending
 
-Add a file to `commands/` with `help()` and `main()` exports—it is automatically discovered and wired up. See [USAGE.md](./USAGE.md) for details.
+Add a file to `commands/` with `register(program)` and `action(...)` exports, then import and register it in `dx.js`. See [USAGE.md](./USAGE.md) for details.

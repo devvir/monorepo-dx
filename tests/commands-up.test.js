@@ -1,166 +1,133 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-// Mock child_process to capture docker commands
-vi.mock('node:child_process', () => ({
-  execSync: vi.fn()
-}));
-
-// Mock logger
 vi.mock('../utils/logger.js', () => ({
   section: vi.fn(),
   pair: vi.fn(),
+  success: vi.fn(),
   fatal: vi.fn(() => { throw new Error('Fatal error'); })
 }));
 
-// Mock docker utils
 vi.mock('../utils/docker.js', () => ({
   parseCommandArgs: vi.fn(),
   runDockerCommand: vi.fn()
 }));
 
-// Mock modules utils
-vi.mock('../utils/modules.js', () => ({
-  getModule: vi.fn((name) => {
-    if (name === 'testmod') {
-      return {
-        name: 'testmod',
-        description: 'Test module',
-        services: ['testapp', 'testinfra']
-      };
-    }
-    if (name === '.') {
-      return {
-        name: '.',
-        description: 'Full application',
-        services: ['testapp', 'testinfra', 'otherapp']
-      };
-    }
-    throw new Error(`Unknown module: ${name}`);
-  }),
-  listModules: vi.fn(() => ['testmod', 'othermod'])
+vi.mock('../utils/runner.js', () => ({
+  runForTarget: vi.fn()
 }));
 
 describe('up command', () => {
   let parseCommandArgs;
   let runDockerCommand;
+  let runForTarget;
 
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    // Get the mocked functions
     const dockerUtils = await import('../utils/docker.js');
     parseCommandArgs = dockerUtils.parseCommandArgs;
     runDockerCommand = dockerUtils.runDockerCommand;
 
-    // Default mock implementation
+    const runner = await import('../utils/runner.js');
+    runForTarget = runner.runForTarget;
+
     parseCommandArgs.mockReturnValue({
       module: 'testmod',
       composeArgs: [],
       moduleConfig: {
-        name: 'testmod',
         description: 'Test module',
         services: ['testapp', 'testinfra']
       }
     });
   });
 
-  describe('help()', () => {
-    it('should export a help function', async () => {
+  describe('register()', () => {
+    it('should export a register function', async () => {
       const upCommand = await import('../commands/up.js');
-      expect(typeof upCommand.help).toBe('function');
-    });
-
-    it('should return a string', async () => {
-      const upCommand = await import('../commands/up.js');
-      const help = upCommand.help();
-      expect(typeof help).toBe('string');
-    });
-
-    it('should mention starting services', async () => {
-      const upCommand = await import('../commands/up.js');
-      const help = upCommand.help();
-      expect(help.toLowerCase()).toContain('up');
+      expect(typeof upCommand.register).toBe('function');
     });
   });
 
-  describe('main()', () => {
-    it('should export a main function', async () => {
+  describe('action()', () => {
+    it('should export an action function', async () => {
       const upCommand = await import('../commands/up.js');
-      expect(typeof upCommand.main).toBe('function');
+      expect(typeof upCommand.action).toBe('function');
     });
 
     it('should call runDockerCommand with module and up command', async () => {
       const upCommand = await import('../commands/up.js');
+      upCommand.action(['testmod'], {});
 
-      parseCommandArgs.mockReturnValue({
-        module: 'testmod',
-        composeArgs: [],
-        moduleConfig: {
-          name: 'testmod',
-          description: 'Test module',
-          services: ['testapp', 'testinfra']
-        }
-      });
-
-      upCommand.main();
-
-      // Verify runDockerCommand was called correctly
       expect(runDockerCommand).toHaveBeenCalledTimes(1);
       expect(runDockerCommand).toHaveBeenCalledWith('testmod', 'up', []);
     });
 
     it('should pass compose args to runDockerCommand', async () => {
-      const upCommand = await import('../commands/up.js');
-
       parseCommandArgs.mockReturnValue({
         module: 'testmod',
         composeArgs: ['-d', '--build'],
         moduleConfig: {
-          name: 'testmod',
           description: 'Test module',
           services: ['testapp', 'testinfra']
         }
       });
 
-      upCommand.main();
+      const upCommand = await import('../commands/up.js');
+      upCommand.action(['testmod', '-d', '--build'], {});
 
       expect(runDockerCommand).toHaveBeenCalledWith('testmod', 'up', ['-d', '--build']);
     });
 
     it('should handle full application module', async () => {
-      const upCommand = await import('../commands/up.js');
-
       parseCommandArgs.mockReturnValue({
         module: null,
         composeArgs: [],
-        moduleConfig: {
-          name: null,
-          description: 'Full application',
-          services: ['testapp', 'testinfra', 'otherapp']
-        }
+        moduleConfig: null
       });
 
-      upCommand.main();
+      const upCommand = await import('../commands/up.js');
+      upCommand.action([], {});
 
       expect(runDockerCommand).toHaveBeenCalledWith(null, 'up', []);
     });
 
     it('should handle single service within module', async () => {
-      const upCommand = await import('../commands/up.js');
-
       parseCommandArgs.mockReturnValue({
         module: 'testmod',
         composeArgs: ['testapp'],
         moduleConfig: {
-          name: 'testmod',
           description: 'Test module',
           services: ['testapp', 'testinfra']
         }
       });
 
-      upCommand.main();
+      const upCommand = await import('../commands/up.js');
+      upCommand.action(['testmod', 'testapp'], {});
 
       expect(runDockerCommand).toHaveBeenCalledWith('testmod', 'up', ['testapp']);
+    });
+
+    it('should run install and build when -i flag is set', async () => {
+      const upCommand = await import('../commands/up.js');
+      upCommand.action(['testmod'], { install: true });
+
+      expect(runForTarget).toHaveBeenCalledWith('testmod', expect.objectContaining({
+        label: 'Installing',
+        pnpmCmd: 'install'
+      }));
+      expect(runForTarget).toHaveBeenCalledWith('testmod', expect.objectContaining({
+        label: 'Building',
+        pnpmCmd: 'build'
+      }));
+      expect(runDockerCommand).toHaveBeenCalledWith('testmod', 'up', []);
+    });
+
+    it('should not run install and build without -i flag', async () => {
+      const upCommand = await import('../commands/up.js');
+      upCommand.action(['testmod'], {});
+
+      expect(runForTarget).not.toHaveBeenCalled();
+      expect(runDockerCommand).toHaveBeenCalledWith('testmod', 'up', []);
     });
   });
 });

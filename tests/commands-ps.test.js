@@ -22,21 +22,21 @@ describe('ps command', () => {
     parseCommandArgs.mockReturnValue({
       module: null,
       composeArgs: [],
-      moduleConfig: { description: 'Full app', services: [] }
+      moduleConfig: null
     });
   });
 
-  describe('help()', () => {
-    it('should return a string mentioning ps', async () => {
+  describe('register()', () => {
+    it('should export a register function', async () => {
       const cmd = await import('../commands/ps.js');
-      expect(cmd.help().toLowerCase()).toContain('ps');
+      expect(typeof cmd.register).toBe('function');
     });
   });
 
-  describe('main()', () => {
-    it('calls runDockerCommand with ps and the module', async () => {
+  describe('action()', () => {
+    it('calls runDockerCommand with ps', async () => {
       const cmd = await import('../commands/ps.js');
-      cmd.main();
+      cmd.action([]);
       expect(runDockerCommand).toHaveBeenCalledWith(null, 'ps', []);
     });
 
@@ -44,10 +44,10 @@ describe('ps command', () => {
       parseCommandArgs.mockReturnValue({
         module: 'mymodule',
         composeArgs: [],
-        moduleConfig: { description: 'MyModule', services: [] }
+        moduleConfig: { description: 'MyModule' }
       });
       const cmd = await import('../commands/ps.js');
-      cmd.main();
+      cmd.action(['mymodule']);
       expect(runDockerCommand).toHaveBeenCalledWith('mymodule', 'ps', []);
     });
   });

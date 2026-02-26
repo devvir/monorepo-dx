@@ -1,22 +1,29 @@
 import { parseCommandArgs, runDockerCommand } from '../utils/docker.js';
 import * as logger from '../utils/logger.js';
 
-export function help() {
-  return `pnpm run dx ps [MODULE]
-  List running services
+/**
+ * List running services.
+ *
+ * @param {string[]} args - Raw args (module detection + docker compose passthrough)
+ */
+export function action(args) {
+  const { module, composeArgs } = parseCommandArgs(args);
 
-  Examples:
-    pnpm run dx ps              # All services
-    pnpm run dx ps mymodule     # Services for module mymodule`;
+  runDockerCommand(module, 'ps', composeArgs);
 }
 
-export function main() {
-  try {
-    const { module, composeArgs } = parseCommandArgs();
-
-    runDockerCommand(module, 'ps', composeArgs);
-  } catch (err) {
-    logger.error(err.message);
-    process.exit(0);
-  }
+export function register(program) {
+  program
+    .command('ps')
+    .description('List running services')
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .action((options, cmd) => {
+      try {
+        action(cmd.args);
+      } catch (err) {
+        logger.error(err.message);
+        process.exit(0);
+      }
+    });
 }

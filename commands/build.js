@@ -1,28 +1,28 @@
-import { listServices, listModules } from '../utils/modules.js';
-import { runCommand } from '../utils/runner.js';
+import { runForTarget } from '../utils/runner.js';
 import * as logger from '../utils/logger.js';
 
-export function help() {
-  return `pnpm run dx build [name] [-- args]
-  Build a service or all services in a module.
-  If the service has a build.sh, it runs that (instead of pnpm, even for node services).
-  Otherwise, if it's a node service, delegates to pnpm build.
-  Extra args after -- are passed to the build script or pnpm.
-
-  Examples:
-    pnpm run dx build                         # Build all services
-    pnpm run dx build myservice               # Build myservice service
-    pnpm run dx build mymodule                # Build all services in the mymodule module
-    pnpm run dx build myservice -- --verbose  # Pass --verbose to myservice's build
-
-  Services: ${listServices().join(', ')}
-  Modules:  ${listModules().join(', ')}`;
+/**
+ * Build a service or all services in a module.
+ *
+ * @param {string|undefined} target - Service or module name (undefined = all)
+ * @param {string[]} [extraArgs] - Extra args to forward (typically after --)
+ */
+export function action(target, extraArgs = []) {
+  runForTarget(target, { script: 'build.sh', pnpmCmd: 'build', label: 'Building', extraArgs });
 }
 
-export function main() {
-  try {
-    runCommand(process.argv.slice(2), { script: 'build.sh', pnpmCmd: 'build', label: 'Building' });
-  } catch (err) {
-    logger.fatal(err.message);
-  }
+export function register(program) {
+  program
+    .command('build [target]')
+    .description('Build a service or all services in a module')
+    .allowExcessArguments()
+    .allowUnknownOption()
+    .action((target, options, cmd) => {
+      try {
+        const extraArgs = target ? cmd.args.slice(1) : cmd.args;
+        action(target, extraArgs);
+      } catch (err) {
+        logger.fatal(err.message);
+      }
+    });
 }

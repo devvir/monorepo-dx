@@ -3,64 +3,42 @@ import { getServices, getService, getModuleServices } from '../utils/modules.js'
 import { hasNpmScript } from '../utils/metadata.js';
 import * as logger from '../utils/logger.js';
 
-export function help() {
-  return `pnpm run dx test [OPTIONS] [SERVICE]
-  Run tests for services that define an npm test script
-
-  Options:
-    -m, --module <NAME>     Run tests for all services in a module
-
-  Examples:
-    pnpm run dx test                # All services with test scripts
-    pnpm run dx test -m mymodule    # All services in the mymodule module
-    pnpm run dx test myservice      # Run tests for myservice only`;
-}
-
-export async function main() {
-  try {
-    const config = parseArgs(process.argv.slice(2));
-    const serviceNames = getServicesToTest(config);
-
-    if (serviceNames.length === 0) {
-      logger.info('No services with test scripts found');
-      process.exit(0);
-    }
-
-    logger.section(`Testing ${serviceNames.length} service(s)`);
-
-    const allServices = getServices();
-    const results = serviceNames.map(name =>
-      runServiceTest(name, allServices[name])
-    );
-
-    reportResults(results);
-  } catch (err) {
-    logger.fatal(err.message);
-  }
-}
-
 /**
- * Parse command arguments to determine test mode and targets
+ * Run tests for services that define an npm test script.
+ *
+ * @param {string|undefined} service - Service name (undefined = all)
+ * @param {object} options - Parsed options
+ * @param {string} [options.module] - Module name to test
  */
-function parseArgs(args) {
-  if (args.length === 0) {
-    return { mode: 'all' };
+export async function action(service, options = {}) {
+  const config = resolveTestConfig(service, options);
+  const serviceNames = getServicesToTest(config);
+
+  if (serviceNames.length === 0) {
+    logger.info('No services with test scripts found');
+    process.exit(0);
   }
 
-  if (args[0] === '-m' || args[0] === '--module') {
-    if (! args[1]) {
-      logger.error('Module name required\nUsage: pnpm run dx test -m <MODULE_NAME>');
-      process.exit(1);
-    }
-    return { mode: 'module', target: args[1] };
-  }
+  logger.section(`Testing ${serviceNames.length} service(s)`);
 
-  return { mode: 'service', target: args[0] };
+  const allServices = getServices();
+  const results = serviceNames.map(name =>
+    runServiceTest(name, allServices[name])
+  );
+
+  reportResults(results);
 }
 
-/**
- * Get list of services to test based on parsed arguments
- */
+function resolveTestConfig(service, options) {
+  if (options.module) {
+    return { mode: 'module', target: options.module };
+  }
+  if (service) {
+    return { mode: 'service', target: service };
+  }
+  return { mode: 'all' };
+}
+
 function getServicesToTest({ mode, target }) {
   const allServices = getServices();
 
@@ -95,9 +73,6 @@ function getServicesToTest({ mode, target }) {
   return [target];
 }
 
-/**
- * Run tests for a single service
- */
 function runServiceTest(serviceName, service) {
   logger.log(`\n→ Testing ${serviceName}...`);
 
@@ -116,9 +91,6 @@ function runServiceTest(serviceName, service) {
   }
 }
 
-/**
- * Report test results and exit with appropriate code
- */
 function reportResults(results) {
   const passCount = results.filter(r => r.passed).length;
   const failCount = results.filter(r => ! r.passed).length;
@@ -135,4 +107,18 @@ function reportResults(results) {
   }
 
   logger.success(`✓ All ${passCount} test suite(s) passed`);
+}
+
+export function register(program) {
+  program
+    .command('test [service]')
+    .description('Run tests for services that define an npm test script')
+    .option('-m, --module <name>', 'Run tests for all services in a module')
+    .action(async (service, options) => {
+      try {
+        await action(service, options);
+      } catch (err) {
+        logger.fatal(err.message);
+      }
+    });
 }

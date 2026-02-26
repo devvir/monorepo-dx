@@ -1,23 +1,31 @@
 import { parseCommandArgs, runDockerCommand } from '../utils/docker.js';
 import * as logger from '../utils/logger.js';
 
-export function help() {
-  return `pnpm run dx config [MODULE]
-  Show resolved docker-compose configuration
+/**
+ * Show resolved docker-compose configuration.
+ *
+ * @param {string[]} args - Raw args (module detection + docker compose passthrough)
+ */
+export function action(args) {
+  const { module, composeArgs, moduleConfig } = parseCommandArgs(args);
 
-  Examples:
-    pnpm run dx config            # Full app config
-    pnpm run dx config mymodule   # Module config`;
+  const label = moduleConfig ? moduleConfig.description : 'all modules';
+  logger.section(`Configuration for ${label}`);
+  logger.log(runDockerCommand(module, 'config', composeArgs, true));
 }
 
-export function main() {
-  try {
-    const { module, composeArgs, moduleConfig } = parseCommandArgs();
-
-    logger.section(`Configuration for ${moduleConfig.description}`);
-    logger.log(runDockerCommand(module, 'config', composeArgs, true));
-  } catch (err) {
-    logger.error(err.message);
-    process.exit(0);
-  }
+export function register(program) {
+  program
+    .command('config')
+    .description('Show resolved docker-compose configuration')
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .action((options, cmd) => {
+      try {
+        action(cmd.args);
+      } catch (err) {
+        logger.error(err.message);
+        process.exit(0);
+      }
+    });
 }

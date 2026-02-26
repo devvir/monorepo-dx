@@ -1,27 +1,34 @@
 import { parseCommandArgs, runDockerCommand } from '../utils/docker.js';
 import * as logger from '../utils/logger.js';
 
-export function help() {
-  return `pnpm run dx down [MODULE] [OPTIONS]
-  Stop services
+/**
+ * Stop services.
+ *
+ * @param {string[]} args - Raw args (module detection + docker compose passthrough)
+ */
+export function action(args) {
+  const { module, composeArgs, moduleConfig } = parseCommandArgs(args);
 
-  Examples:
-    pnpm run dx down mymodule      # Stop mymodule module
-    pnpm run dx down socket        # Stop socket`;
+  logger.section(module ? `Stopping ${moduleConfig.description}` : 'Stopping all modules');
+  if (module) logger.pair('Module:', module);
+
+  runDockerCommand(module, 'down', composeArgs);
+
+  logger.success('Services stopped');
 }
 
-export function main() {
-  try {
-    const { module, composeArgs, moduleConfig } = parseCommandArgs();
-
-    logger.section(module ? `Stopping ${moduleConfig.description}` : 'Stopping all modules');
-    if (module) logger.pair('Module:', module);
-
-    runDockerCommand(module, 'down', composeArgs);
-
-    logger.success('Services stopped');
-  } catch (err) {
-    logger.error(err.message);
-    process.exit(0);
-  }
+export function register(program) {
+  program
+    .command('down')
+    .description('Stop services')
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .action((options, cmd) => {
+      try {
+        action(cmd.args);
+      } catch (err) {
+        logger.error(err.message);
+        process.exit(0);
+      }
+    });
 }

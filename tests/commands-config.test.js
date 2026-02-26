@@ -1,26 +1,62 @@
-import { describe, it, expect } from 'vitest';
-import * as configCommand from '../commands/config.js';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+
+vi.mock('../utils/logger.js', () => ({
+  section: vi.fn(),
+  log: vi.fn(),
+  error: vi.fn()
+}));
+
+vi.mock('../utils/docker.js', () => ({
+  parseCommandArgs: vi.fn(),
+  runDockerCommand: vi.fn()
+}));
 
 describe('config command', () => {
-  describe('help()', () => {
-    it('should export a help function', () => {
-      expect(typeof configCommand.help).toBe('function');
-    });
+  let parseCommandArgs;
+  let runDockerCommand;
 
-    it('should return a string', () => {
-      const help = configCommand.help();
-      expect(typeof help).toBe('string');
-    });
+  beforeEach(async () => {
+    vi.clearAllMocks();
+    const dockerUtils = await import('../utils/docker.js');
+    parseCommandArgs = dockerUtils.parseCommandArgs;
+    runDockerCommand = dockerUtils.runDockerCommand;
 
-    it('should mention configuration', () => {
-      const help = configCommand.help();
-      expect(help.toLowerCase()).toContain('config');
+    parseCommandArgs.mockReturnValue({
+      module: 'testmod',
+      composeArgs: [],
+      moduleConfig: { description: 'Test module' }
+    });
+    runDockerCommand.mockReturnValue('resolved-config-output');
+  });
+
+  describe('register()', () => {
+    it('should export a register function', async () => {
+      const cmd = await import('../commands/config.js');
+      expect(typeof cmd.register).toBe('function');
     });
   });
 
-  describe('main()', () => {
-    it('should export a main function', () => {
-      expect(typeof configCommand.main).toBe('function');
+  describe('action()', () => {
+    it('should export an action function', async () => {
+      const cmd = await import('../commands/config.js');
+      expect(typeof cmd.action).toBe('function');
+    });
+
+    it('calls runDockerCommand with config and capture=true', async () => {
+      const cmd = await import('../commands/config.js');
+      cmd.action(['testmod']);
+      expect(runDockerCommand).toHaveBeenCalledWith('testmod', 'config', [], true);
+    });
+
+    it('handles null module gracefully', async () => {
+      parseCommandArgs.mockReturnValue({
+        module: null,
+        composeArgs: [],
+        moduleConfig: null
+      });
+      const cmd = await import('../commands/config.js');
+      cmd.action([]);
+      expect(runDockerCommand).toHaveBeenCalledWith(null, 'config', [], true);
     });
   });
 });

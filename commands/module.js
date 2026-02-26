@@ -3,48 +3,45 @@ import { getModule, getModuleServices } from '../utils/modules.js';
 import * as logger from '../utils/logger.js';
 import { readReadme } from '../utils/metadata.js';
 
-export function help() {
-  return `pnpm run dx module -- <NAME>
-  Show detailed information about a module
+/**
+ * Show detailed information about a module.
+ *
+ * @param {string} name - Module name
+ */
+export function action(name) {
+  const module = getModule(name);
 
-  Examples:
-    pnpm run dx module -- mymodule#   # MyModule module details
-    pnpm run dx module -- socket      # Socket module details`;
+  logger.section(name);
+  logger.log(module.description);
+
+  const services = getModuleServices(name);
+
+  if (services.length > 0) {
+    logger.section('Services');
+
+    services.forEach(service => {
+      logger.log(`  • ${service}`);
+    });
+  }
+
+  const readme = readReadme(module.path);
+
+  if (readme) {
+    logger.section('README');
+    logger.log(marked(readme));
+  }
 }
 
-export function main() {
-  const moduleName = process.argv[2];
-
-  if (! moduleName) {
-    logger.error('Module name required\nUsage: pnpm run dx module -- <MODULE_NAME>');
-
-    process.exit(0);
-  }
-
-  try {
-    const module = getModule(moduleName);
-
-    logger.section(moduleName);
-    logger.log(module.description);
-
-    const services = getModuleServices(moduleName);
-
-    if (services.length > 0) {
-      logger.section('Services');
-
-      services.forEach(service => {
-        logger.log(`  • ${service}`);
-      });
-    }
-
-    const readme = readReadme(module.path);
-
-    if (readme) {
-      logger.section('README');
-      logger.log(marked(readme));
-    }
-  } catch (error) {
-    logger.error(error.message);
-    process.exit(0);
-  }
+export function register(program) {
+  program
+    .command('module <name>')
+    .description('Show detailed information about a module')
+    .action((name) => {
+      try {
+        action(name);
+      } catch (error) {
+        logger.error(error.message);
+        process.exit(0);
+      }
+    });
 }

@@ -29,17 +29,17 @@ describe('down command', () => {
     });
   });
 
-  describe('help()', () => {
-    it('should return a string mentioning down', async () => {
+  describe('register()', () => {
+    it('should export a register function', async () => {
       const cmd = await import('../commands/down.js');
-      expect(cmd.help().toLowerCase()).toContain('down');
+      expect(typeof cmd.register).toBe('function');
     });
   });
 
-  describe('main()', () => {
+  describe('action()', () => {
     it('calls runDockerCommand with down and the module', async () => {
       const cmd = await import('../commands/down.js');
-      cmd.main();
+      cmd.action(['testmod']);
       expect(runDockerCommand).toHaveBeenCalledWith('testmod', 'down', []);
     });
 
@@ -50,7 +50,7 @@ describe('down command', () => {
         moduleConfig: { description: 'Test module', services: [] }
       });
       const cmd = await import('../commands/down.js');
-      cmd.main();
+      cmd.action(['testmod', '-v', '--remove-orphans']);
       expect(runDockerCommand).toHaveBeenCalledWith('testmod', 'down', ['-v', '--remove-orphans']);
     });
   });

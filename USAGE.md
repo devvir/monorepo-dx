@@ -3,7 +3,7 @@
 **Recommended Setup**
 - Include this repo as a submodule of your monorepo, e.g. in ./dx/
 - Copy entrypoint to the root of your monorepo and make sure it's executable
-- Optionally, rename the entrypoint copy to something meaninful for your project
+- Optionally, rename the entrypoint copy to something meaningful for your project
 - Update the path to this submodule if different from ./dx
 - If needed, update the paths to the modules and services folders
 - Tip: fork the repo if you'd rather add your own commands to the mix
@@ -16,44 +16,39 @@ After taking these steps, you may use the command right from the root of your pr
 - `[entrypoint] services`
 - ...
 
+Run `[entrypoint] --help` or `[entrypoint] <command> --help` for inline usage.
+
 ## Commands
 
-### build
+See [docs/commands.md](./docs/commands.md) for the full command reference.
 
-Build services. Understands dx's concept of services and modules, and normalizes node and non-node services under a consistent interface.
+Quick overview:
 
-```bash
-[entrypoint] build                  # Build all services
-[entrypoint] build <service>        # Build a specific service
-[entrypoint] build <module>         # Build all services in a module
-[entrypoint] build <name> -- <args> # Pass extra args to the build script or pnpm
-```
+| Command | Description |
+|---------|-------------|
+| `up [options]` | Start services (`-i` to install + build first) |
+| `down` | Stop services |
+| `ps` | List running services |
+| `logs` | View service logs |
+| `build [target]` | Build services |
+| `install [target]` | Install service dependencies |
+| `test [service]` | Run service tests (`-m <module>` for module scope) |
+| `dev` | Install, build, and start in one step |
+| `config` | Show resolved Docker Compose config |
+| `services` | List all discovered services |
+| `modules` | List all discovered modules |
+| `service <name>` | Show details about a service |
+| `module <name>` | Show details about a module |
 
-**Resolution order:**
-1. If the service has a `build.sh` script, it is executed (takes precedence over pnpm, even for Node services)
-2. Otherwise, if the service has a `package.json`, delegates to `pnpm build --filter="<service>"`
-3. Otherwise, skips (when building all or by module) or fails (when targeting a specific service)
+### Build & Install Resolution
 
-**Notes:**
-- When no filter is given or a module name is used, services with no build steps are silently skipped
-- When a specific service name is given, no build steps is treated as an error
-- module name takes precedence over a service name if both exist with the same name
+For each service, `build` and `install` check in order:
 
-### install
+1. **Shell script** (`build.sh` / `install.sh`) — Executed via bash. Takes precedence even for Node services, allowing you to wrap or extend the default behavior.
+2. **`package.json`** — Delegates to `pnpm build` / `pnpm install` with `--filter="<package-name>"`.
+3. **Nothing** — Silently skipped when running all or by module. Error when targeting a specific service.
 
-Install service dependencies. Follows the exact same logic as `build`, substituting `install.sh` and `pnpm install`.
-
-```bash
-[entrypoint] install                  # Install all services
-[entrypoint] install <service>        # Install a specific service
-[entrypoint] install <module>         # Install all services in a module
-[entrypoint] install <name> -- <args> # Pass extra args to the install script or pnpm
-```
-
-**Resolution order:**
-1. If the service has an `install.sh` script, it is executed (takes precedence over pnpm, even for Node services)
-2. Otherwise, if the service has a `package.json`, delegates to `pnpm install --filter="<service>"`
-3. Otherwise, skips (when installing all or by module) or fails (when targeting a specific service)
+Module name takes precedence over service name if both exist with the same name.
 
 ### Opting out with `.dxskip`
 

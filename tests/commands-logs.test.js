@@ -5,8 +5,7 @@ vi.mock('../utils/logger.js', () => ({
 }));
 
 vi.mock('../utils/docker.js', () => ({
-  runDockerCommand: vi.fn(),
-  buildComposeCommand: vi.fn()
+  runDockerCommand: vi.fn()
 }));
 
 vi.mock('../utils/modules.js', () => ({
@@ -20,43 +19,37 @@ describe('logs command', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     runDockerCommand = (await import('../utils/docker.js')).runDockerCommand;
-    // Reset process.argv to a clean state
-    process.argv = ['node', 'dx.js'];
   });
 
-  describe('help()', () => {
-    it('should return a string mentioning logs', async () => {
+  describe('register()', () => {
+    it('should export a register function', async () => {
       const cmd = await import('../commands/logs.js');
-      expect(cmd.help().toLowerCase()).toContain('log');
+      expect(typeof cmd.register).toBe('function');
     });
   });
 
-  describe('main()', () => {
-    it('uses full app when no module given', async () => {
-      process.argv = ['node', 'dx.js', '-f'];
+  describe('action()', () => {
+    it('uses null module when no module given', async () => {
       const cmd = await import('../commands/logs.js');
-      cmd.main();
+      cmd.action(['-f']);
       expect(runDockerCommand).toHaveBeenCalledWith(null, 'logs', ['-f']);
     });
 
     it('extracts module name from args and leaves flags', async () => {
-      process.argv = ['node', 'dx.js', 'mymodule', '-f'];
       const cmd = await import('../commands/logs.js');
-      cmd.main();
+      cmd.action(['mymodule', '-f']);
       expect(runDockerCommand).toHaveBeenCalledWith('mymodule', 'logs', ['-f']);
     });
 
     it('extracts module even when flags appear before it', async () => {
-      process.argv = ['node', 'dx.js', '-t', '20', 'mymodule'];
       const cmd = await import('../commands/logs.js');
-      cmd.main();
+      cmd.action(['-t', '20', 'mymodule']);
       expect(runDockerCommand).toHaveBeenCalledWith('mymodule', 'logs', ['-t', '20']);
     });
 
     it('passes all args as log options when no module given', async () => {
-      process.argv = ['node', 'dx.js', '-t', '50'];
       const cmd = await import('../commands/logs.js');
-      cmd.main();
+      cmd.action(['-t', '50']);
       expect(runDockerCommand).toHaveBeenCalledWith(null, 'logs', ['-t', '50']);
     });
   });

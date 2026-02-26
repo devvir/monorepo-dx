@@ -47,23 +47,16 @@ export function runForService(name, { script, pnpmCmd, label, extraArgs = [], st
 }
 
 /**
- * Parse args, resolve service/module, and run the command.
- * Modules and no-filter runs are non-strict; direct service calls are strict.
+ * Run a command for a resolved target (service name, module name, or undefined for all).
  *
- * @param {string[]} args - Raw CLI args (may include '--' separator)
+ * @param {string|undefined} name - Service or module name (undefined = all services)
  * @param {object} opts
- * @param {string} opts.script   - Shell script filename
- * @param {string} opts.pnpmCmd  - pnpm subcommand
- * @param {string} opts.label    - Human label
+ * @param {string} opts.script   - Shell script filename, e.g. 'build.sh'
+ * @param {string} opts.pnpmCmd  - pnpm subcommand, e.g. 'build' or 'install'
+ * @param {string} opts.label    - Human label for log messages
+ * @param {string[]} [opts.extraArgs] - Extra args to forward
  */
-export function runCommand(args, { script, pnpmCmd, label }) {
-  const separatorIdx = args.indexOf('--');
-  const positional = separatorIdx === -1 ? args : args.slice(0, separatorIdx);
-  const extraArgs = separatorIdx === -1 ? [] : args.slice(separatorIdx + 1);
-  // Flags (--something) are not service/module names; treat as no filter
-  const name = positional[0]?.startsWith('-') ? undefined : positional[0];
-  const opts = { script, pnpmCmd, label, extraArgs };
-
+export function runForTarget(name, opts) {
   if (! name) {
     for (const svcName of listServices()) {
       runForService(svcName, { ...opts, strict: false });
@@ -76,7 +69,7 @@ export function runCommand(args, { script, pnpmCmd, label }) {
 
   if (modules.includes(name)) {
     const serviceNames = getModuleServices(name);
-    logger.section(`${label} ${serviceNames.length} service(s) for module "${name}"`);
+    logger.section(`${opts.label} ${serviceNames.length} service(s) for module "${name}"`);
     for (const svcName of serviceNames) {
       runForService(svcName, { ...opts, strict: false });
     }
@@ -85,4 +78,23 @@ export function runCommand(args, { script, pnpmCmd, label }) {
   } else {
     logger.fatal(`Unknown service or module: "${name}"`);
   }
+}
+
+/**
+ * Parse args, resolve service/module, and run the command.
+ * Legacy wrapper around runForTarget - parses '--' separator from raw args.
+ *
+ * @param {string[]} args - Raw CLI args (may include '--' separator)
+ * @param {object} opts
+ * @param {string} opts.script   - Shell script filename
+ * @param {string} opts.pnpmCmd  - pnpm subcommand
+ * @param {string} opts.label    - Human label
+ */
+export function runCommand(args, { script, pnpmCmd, label }) {
+  const separatorIdx = args.indexOf('--');
+  const positional = separatorIdx === -1 ? args : args.slice(0, separatorIdx);
+  const extraArgs = separatorIdx === -1 ? [] : args.slice(separatorIdx + 1);
+  const name = positional[0]?.startsWith('-') ? undefined : positional[0];
+
+  runForTarget(name, { script, pnpmCmd, label, extraArgs });
 }

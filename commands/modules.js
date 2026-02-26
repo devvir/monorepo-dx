@@ -1,15 +1,10 @@
 import { listModules, getModules } from '../utils/modules.js';
 import * as logger from '../utils/logger.js';
 
-export function help() {
-  return `pnpm run dx modules [OPTIONS]
-  List all deployment modules
-
-  Options:
-    -v, --verbose           Show more details (path, compose file)`;
-}
-
-export function main() {
+/**
+ * List all deployment modules.
+ */
+export function action() {
   const modules = getModules();
   const moduleNames = listModules();
 
@@ -32,5 +27,13 @@ export function main() {
   });
 
   logger.log('');
-  logger.log('Use: pnpm run dx up -- <MODULE>     # Start a module');
+  const executor = process.env.DX_EXECUTOR || 'dx';
+  logger.log(`Use: ${executor} up <MODULE>     # Start a module`);
+}
+
+export function register(program) {
+  program
+    .command('modules')
+    .description('List all deployment modules')
+    .action(action);
 }

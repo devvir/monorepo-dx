@@ -1,53 +1,67 @@
 /**
  * DX (Developer Experience) - Main entry point for all CLI commands
  *
- * Routes command requests to appropriate command modules.
- * This allows `dx <command> [args]` to work seamlessly.
+ * Uses Commander for argument parsing and subcommand routing.
  */
 
-import path from 'node:path';
-import { fileURLToPath } from 'node:url';
-import * as logger from './utils/logger.js';
+import { Command } from 'commander';
+import { register as registerUp } from './commands/up.js';
+import { register as registerDown } from './commands/down.js';
+import { register as registerLogs } from './commands/logs.js';
+import { register as registerPs } from './commands/ps.js';
+import { register as registerConfig } from './commands/config.js';
+import { register as registerBuild } from './commands/build.js';
+import { register as registerInstall } from './commands/install.js';
+import { register as registerTest } from './commands/test.js';
+import { register as registerDev } from './commands/dev.js';
+import { register as registerModules } from './commands/modules.js';
+import { register as registerModule } from './commands/module.js';
+import { register as registerServices } from './commands/services.js';
+import { register as registerService } from './commands/service.js';
+import { listModules, getModules } from './utils/modules.js';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const commandsDir = path.join(__dirname, 'commands');
+const program = new Command();
 
-async function main() {
-  setVerbosity();
+program
+  .name(process.env.DX_EXECUTOR || 'dx')
+  .version('0.1.0')
+  .description('Infrastructure and deployment orchestration')
+  .option('-v, --verbose', 'Verbose output');
 
-  const commandName = process.argv[2] || 'help';
-  const commandPath = path.join(commandsDir, `${commandName}.js`);
-
-  try {
-    const commandModule = await import(`file://${commandPath}`);
-
-    if (! ('main' in commandModule)) {
-      logger.fatal(`Command '${commandName}' does not export main() function`);
-    }
-
-    // Shift argv so that the command sees its arguments in argv[2]
-    // Remove: node, dx.js, command-name
-    process.argv.splice(2, 1);
-
-    await commandModule.main();
-  } catch (err) {
-    if (err.code === 'ERR_MODULE_NOT_FOUND' || err.message.includes('not found')) {
-      logger.fatal(`Unknown command: ${commandName}`);
-    }
-
-    logger.fatal(err.message);
-  }
-}
-
-function setVerbosity() {
-  const verboseIndex = process.argv.findIndex(arg => arg === '-v' || arg === '--verbose');
-
-  if (verboseIndex !== -1) {
+program.hook('preAction', () => {
+  if (program.opts().verbose) {
     process.env.VERBOSE = '1';
-    process.argv.splice(verboseIndex, 1);
   }
+});
+
+registerUp(program);
+registerDown(program);
+registerLogs(program);
+registerPs(program);
+registerConfig(program);
+registerBuild(program);
+registerInstall(program);
+registerTest(program);
+registerDev(program);
+registerModules(program);
+registerModule(program);
+registerServices(program);
+registerService(program);
+
+// Append module listing to help output
+const modules = getModules();
+const moduleNames = listModules();
+
+if (moduleNames.length > 0) {
+  const moduleList = moduleNames
+    .map(name => `  ${name.padEnd(15)} ${modules[name].description}`)
+    .join('\n');
+  program.addHelpText('after', `\nModules:\n${moduleList}\n`);
 }
 
-main().catch(err => {
-  logger.fatal(`Unexpected error: ${err.message}`);
-});
+// Show help and exit cleanly when no arguments are given
+if (process.argv.length <= 2) {
+  program.help();
+}
+
+program.parse();

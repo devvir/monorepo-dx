@@ -1,15 +1,10 @@
 import { listServices, getServices } from '../utils/modules.js';
 import * as logger from '../utils/logger.js';
 
-export function help() {
-  return `pnpm run dx services [OPTIONS]
-  List all available services
-
-  Options:
-    -v, --verbose           Show more details (port, image)`;
-}
-
-export function main() {
+/**
+ * List all available services.
+ */
+export function action() {
   const services = getServices();
   const serviceNames = listServices();
 
@@ -32,6 +27,13 @@ export function main() {
   });
 
   logger.log('');
-  logger.log('Use: pnpm run dx service -- <NAME>  # Get details about a service');
+  const executor = process.env.DX_EXECUTOR || 'dx';
+  logger.log(`Use: ${executor} service <NAME>  # Get details about a service`);
 }
 
+export function register(program) {
+  program
+    .command('services')
+    .description('List all available services')
+    .action(action);
+}

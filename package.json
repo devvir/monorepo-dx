@@ -12,6 +12,9 @@
   "engines": {
     "node": ">=22.0.0"
   },
+  "dependencies": {
+    "commander": "^14.0.0"
+  },
   "devDependencies": {
     "cli-markdown": "^3.5.1",
     "vitest": "^4.0.18"

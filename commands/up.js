@@ -1,38 +1,55 @@
 import { parseCommandArgs, runDockerCommand } from '../utils/docker.js';
+import { runForTarget } from '../utils/runner.js';
 import * as logger from '../utils/logger.js';
 
-export function help() {
-  return `pnpm run dx up [MODULE] [OPTIONS]
-  Start services
+/**
+ * Start services, optionally installing dependencies and building first.
+ *
+ * @param {string[]} args - Raw args (module detection + docker compose passthrough)
+ * @param {object} options - Parsed options
+ * @param {boolean} [options.install] - Run install + build before starting
+ */
+export function action(args, options = {}) {
+  const { module, composeArgs, moduleConfig } = parseCommandArgs(args);
 
-  Examples:
-    pnpm run dx up mymodule        # MyModule module
-    pnpm run dx up socket -d       # Socket, detached`;
+  if (options.install) {
+    logger.section('Installing dependencies...');
+    runForTarget(module, { script: 'install.sh', pnpmCmd: 'install', label: 'Installing' });
+
+    logger.section('Building...');
+    runForTarget(module, { script: 'build.sh', pnpmCmd: 'build', label: 'Building' });
+  }
+
+  const requestedServices = composeArgs.filter(arg => ! arg.startsWith('-') && ! arg.includes('='));
+  const isSingleService = requestedServices.length === 1 && moduleConfig?.services?.includes(requestedServices[0]);
+
+  if (isSingleService) {
+    logger.section(`Starting single service from module: ${module}`);
+    logger.pair('Module:', module);
+    logger.pair('Service:', requestedServices[0]);
+  } else if (module) {
+    logger.section(`Starting ${moduleConfig.description}`);
+    logger.pair('Module:', module);
+    logger.pair('Services:', moduleConfig.services.join(', '));
+  } else {
+    logger.section('Starting all modules');
+  }
+
+  runDockerCommand(module, 'up', composeArgs);
 }
 
-export function main() {
-  try {
-    const { module, composeArgs, moduleConfig } = parseCommandArgs();
-
-    // Determine if a single service is being started (e.g., tb up mymodule rabbitmq)
-    // Find first positional arg after module that is not a flag
-    const requestedServices = composeArgs.filter(arg => ! arg.startsWith('-') && ! arg.includes('='));
-    const isSingleService = requestedServices.length === 1 && moduleConfig?.services?.includes(requestedServices[0]);
-
-    if (isSingleService) {
-      logger.section(`Starting single service from module: ${module}`);
-      logger.pair('Module:', module);
-      logger.pair('Service:', requestedServices[0]);
-    } else if (module) {
-      logger.section(`Starting ${moduleConfig.description}`);
-      logger.pair('Module:', module);
-      logger.pair('Services:', moduleConfig.services.join(', '));
-    } else {
-      logger.section('Starting all modules');
-    }
-
-    runDockerCommand(module, 'up', composeArgs);
-  } catch (err) {
-    logger.fatal(err.message);
-  }
+export function register(program) {
+  program
+    .command('up')
+    .description('Start services')
+    .option('-i, --install', 'Install dependencies and build before starting')
+    .allowUnknownOption()
+    .allowExcessArguments()
+    .action((options, cmd) => {
+      try {
+        action(cmd.args, options);
+      } catch (err) {
+        logger.fatal(err.message);
+      }
+    });
 }
