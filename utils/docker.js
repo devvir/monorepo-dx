@@ -155,7 +155,7 @@ export function buildComposeCommand(options = {}) {
 
   // 2. Module .env (always load if exists and not root module)
   if (module) {
-    const moduleEnv = path.join(PROJECT_ROOT, 'modules', module, '.env');
+    const moduleEnv = path.join(moduleConfig.path, '.env');
     if (fs.existsSync(moduleEnv)) envFiles.push(moduleEnv);
 
     // 3. Module .env.<APP_ENV> (only if APP_ENV is set in root .env)
@@ -164,7 +164,7 @@ export function buildComposeCommand(options = {}) {
       const appEnv = rootEnvVars.APP_ENV;
 
       if (appEnv) {
-        const envSpecificFile = path.join(PROJECT_ROOT, 'modules', module, `.env.${appEnv}`);
+        const envSpecificFile = path.join(moduleConfig.path, `.env.${appEnv}`);
         if (fs.existsSync(envSpecificFile)) envFiles.push(envSpecificFile);
       }
     }

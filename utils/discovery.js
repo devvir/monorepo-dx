@@ -79,32 +79,47 @@ export function discoverServices() {
 }
 
 /**
- * Discover all modules by scanning modules/ directory
- * @returns {Object} Map of modules
+ * Discover all modules by recursively scanning the modules directory.
+ * Any directory containing a compose.yml is treated as a module.
+ * Module names are relative paths from MODULES_DIR (e.g. "history/collector").
+ * @returns {Object} Map of modules keyed by name
  */
 export function discoverModules() {
   const modules = {};
 
-  if (!fs.existsSync(MODULES_DIR)) return modules;
+  if (! fs.existsSync(MODULES_DIR)) return modules;
 
-  const entries = fs.readdirSync(MODULES_DIR, { withFileTypes: true });
-
-  for (const entry of entries) {
-    if (!entry.isDirectory() || entry.name.startsWith('.')) continue;
-
-    const moduleName = entry.name;
-    const modulePath = path.join(MODULES_DIR, moduleName);
-    const composePath = path.join(modulePath, 'compose.yml');
-
-    const description = readDescription(modulePath) || `${moduleName} module`;
-
-    modules[moduleName] = {
-      path: modulePath,
-      description,
-      compose: `modules/${moduleName}/compose.yml`,
-      hasCompose: fs.existsSync(composePath)
-    };
-  }
+  scanModuleDir(MODULES_DIR, '', modules);
 
   return modules;
+}
+
+function scanModuleDir(dir, prefix, modules) {
+  const entries = fs.readdirSync(dir, { withFileTypes: true });
+
+  for (const entry of entries) {
+    if (! entry.isDirectory() || entry.name.startsWith('.')) continue;
+
+    const modulePath = path.join(dir, entry.name);
+    const composePath = path.join(modulePath, 'compose.yml');
+    const leafName = entry.name;
+
+    if (fs.existsSync(composePath)) {
+      if (modules[leafName]) {
+        const existing = modules[leafName].path;
+        throw new Error(`Module name collision: "${leafName}" found at both "${existing}" and "${modulePath}"`);
+      }
+      const description = readDescription(modulePath) || `${leafName} module`;
+      modules[leafName] = {
+        path: modulePath,
+        description,
+        compose: path.relative(PROJECT_ROOT, composePath),
+        hasCompose: true,
+      };
+    } else {
+      // No compose.yml — treat as a namespace directory, scan deeper
+      const namespacedPrefix = prefix ? `${prefix}/${entry.name}` : entry.name;
+      scanModuleDir(modulePath, namespacedPrefix, modules);
+    }
+  }
 }
