@@ -10,7 +10,9 @@ import { parseComposeFile } from './compose-parser.js';
 import { readDescription } from './metadata.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = path.join(__dirname, '../..');
+const PROJECT_ROOT = process.env.DX_PROJECT_ROOT
+  ? path.resolve(process.env.DX_PROJECT_ROOT)
+  : path.join(__dirname, '../..');
 
 // Allow customization via environment variables, with defaults
 const SERVICES_DIR = process.env.DX_SERVICES_DIR

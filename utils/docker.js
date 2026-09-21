@@ -13,7 +13,9 @@ import { parseEnvFile } from './env.js';
 import * as logger from './logger.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = path.join(__dirname, '../..');
+const PROJECT_ROOT = process.env.DX_PROJECT_ROOT
+  ? path.resolve(process.env.DX_PROJECT_ROOT)
+  : path.join(__dirname, '../..');
 
 /**
  * Parse CLI args to extract module name and docker compose flags

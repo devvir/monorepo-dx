@@ -9,7 +9,9 @@ import { parseModuleServices } from './compose-parser.js';
 import { discoverServices, discoverModules } from './discovery.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const PROJECT_ROOT = path.join(__dirname, '../..');
+const PROJECT_ROOT = process.env.DX_PROJECT_ROOT
+  ? path.resolve(process.env.DX_PROJECT_ROOT)
+  : path.join(__dirname, '../..');
 
 /**
  * Get all services
